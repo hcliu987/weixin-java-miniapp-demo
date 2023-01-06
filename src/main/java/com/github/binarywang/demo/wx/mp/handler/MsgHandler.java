@@ -51,6 +51,9 @@ public class MsgHandler extends AbstractHandler {
 
         //TODO 组装回复消息
         String content = analysisJson( get2(wxMessage.getContent()));
+        if (content.length()<1){
+            content="没查询到相关内容";
+        }
 
         return new TextBuilder().build(content, wxMessage, weixinService);
 
@@ -151,12 +154,11 @@ public class MsgHandler extends AbstractHandler {
         return JSONUtil.parseObj(result).getStr("token");
     }
 
-    public static void main(String[] args) {
-
-    }
 
 
-    public String analysisJson(String json) {
+    public static String analysisJson(String json) {
+
+
         if (json.length()>0){
             JsonsRootBean jsonsRootBean = JSONUtil.toBean(json, JsonsRootBean.class);
             StringBuffer sb = new StringBuffer();
@@ -167,5 +169,9 @@ public class MsgHandler extends AbstractHandler {
             return sb.toString();
         }
         return "暂无资源";
+    }
+
+    public static void main(String[] args) {
+        System.out.println( analysisJson(get2("复仇者")));
     }
 }
