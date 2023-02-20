@@ -118,12 +118,12 @@ public class MsgHandler extends AbstractHandler {
         JSONObject json = new JSONObject();
         json.put("name", text);
         json.put("token", getToken2());
-        String result = HttpRequest.post(" http://npcls.com/v/api/getJuzi").
+        String result = HttpRequest.post("http://api.kkkob.com/v/api/getJuzi").
                 header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                 .header("Accept", "*/*")
                 .header("Accept-Language", "zh-CN,zh-Hans;q=0.9")
                 .header("Accept-Encoding", "gzip, deflate")
-                .header("Host", "npcls.com")
+                .header("Host", "api.kkkob.com")
                 .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 Safari/605.1.15")
                 .header("Connection", "keep-alive")
                 .header("Cookie", "Hm_lpvt_0606cc863fe63b0953d06585b4897bcb=1671510857; Hm_lvt_0606cc863fe63b0953d06585b4897bcb=1669378804,1670119326,1670130069,1671364887")
@@ -139,7 +139,7 @@ public class MsgHandler extends AbstractHandler {
 
 
     private static String getToken2() {
-        String url = "http://npcls.com/v/api/gettoken";
+        String url = "http://api.kkkob.com/v/api/gettoken";
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
         paramMap.put("Accept", "*/*");

@@ -1,0 +1,9 @@
+wx:
+  mp:
+    configs:
+      - appId: wx58637383993d7ec0
+        secret: e61b2f35a0447554aa0cf76347468990
+        token: hcliu
+        aesKey: tzO1Kqsb1boxcIfzNu994V4spoZXZriGhHhMmSAPdmP
+server:
+  port: 80
