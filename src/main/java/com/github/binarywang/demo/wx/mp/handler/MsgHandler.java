@@ -7,7 +7,7 @@ import cn.hutool.json.JSONUtil;
 import com.github.binarywang.demo.wx.mp.builder.TextBuilder;
 import com.github.binarywang.demo.wx.mp.entity.JsonsRootBean;
 import com.github.binarywang.demo.wx.mp.entity.Lists;
-import com.github.binarywang.demo.wx.mp.utils.JsonUtils;
+import com.github.binarywang.demo.wx.mp.task.TaskRunner;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -16,8 +16,8 @@ import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 import static me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
 
@@ -26,7 +26,6 @@ import static me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
  */
 @Component
 public class MsgHandler extends AbstractHandler {
-
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
                                     Map<String, Object> context, WxMpService weixinService,
@@ -49,10 +48,30 @@ public class MsgHandler extends AbstractHandler {
             e.printStackTrace();
         }
 
+
+        if (wxMessage.getFromUser().equals("oDVX56e9DU6GqAKNwJ9xsU9axKFs") || wxMessage.getFromUser().equals("oDVX56bDrhCpo1Ox1bbq6DAGuXJ4")) {
+            TaskRunner t = new TaskRunner();
+
+            String msg = wxMessage.getContent().replace("-", " ");
+            String[] split = msg.split("\\\n");
+            ArrayList<int[]> objects = new ArrayList<>();
+
+            for (String s : split) {
+
+                int[] s1 = Arrays.asList(s.split(" ")).stream().mapToInt(Integer::parseInt).toArray();
+                objects.add(s1);
+            }
+            try {
+                t.run(objects);
+
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        }
         //TODO 组装回复消息
-        String content = analysisJson( get2(wxMessage.getContent()));
-        if (content.length()<1){
-            content="没查询到相关内容";
+        String content = analysisJson(get2(wxMessage.getContent()));
+        if (content.length() < 1) {
+            content = "没查询到相关内容";
         }
 
         return new TextBuilder().build(content, wxMessage, weixinService);
@@ -155,11 +174,10 @@ public class MsgHandler extends AbstractHandler {
     }
 
 
-
     public static String analysisJson(String json) {
 
 
-        if (json.length()>0){
+        if (json.length() > 0) {
             JsonsRootBean jsonsRootBean = JSONUtil.toBean(json, JsonsRootBean.class);
             StringBuffer sb = new StringBuffer();
             for (Lists lists : jsonsRootBean.getList()) {
@@ -171,7 +189,9 @@ public class MsgHandler extends AbstractHandler {
         return "暂无资源";
     }
 
-    public static void main(String[] args) {
-        System.out.println( analysisJson(get2("复仇者")));
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        String msg = "3 15 16 21 26 32-5\n1 14 16 22 26 31-12 \n4 13 17 27 29 30-6 \n4 9 11 13 27 28-11\n7 11 20 23 25 32-1";
+
+
     }
 }

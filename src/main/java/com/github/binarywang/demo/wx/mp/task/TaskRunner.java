@@ -1,12 +1,10 @@
-package com.github.binarywang.demo.wx.mp.tack;
+package com.github.binarywang.demo.wx.mp.task;
 
 import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 
 import java.io.IOException;
@@ -14,29 +12,27 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.Map;
 
 @Component
-public class taskRunner {
+public class TaskRunner {
 
 
     public static List myNumbers = new ArrayList<int[]>();
     public static int count = 0;
     public static int money = 0;
 
-    @Scheduled(cron = " 15 15 21 ? * 2,4,7 ")
-    public static void run() throws UnsupportedEncodingException {
-        myNumbers.add(new int[]{3, 15, 16, 21, 26, 32, 5});
-        myNumbers.add(new int[]{1, 14, 16, 22, 26, 31, 12});
-        myNumbers.add(new int[]{4, 13, 17, 27, 29, 30, 6});
-        myNumbers.add(new int[]{4, 9, 11, 13, 27, 28, 11});
-        myNumbers.add(new int[]{7, 11, 20, 23, 25, 32, 1});
+
+   // @Scheduled(cron = "10 41 22 ? * 2,4,7")
+    public void run(ArrayList<int[]> myNumbers) throws UnsupportedEncodingException {
         int redNumbers = 0;
         int blueNumbers = 0;
         String[] luckyNumbers = getLastSsq();
@@ -92,7 +88,7 @@ public class taskRunner {
                 count += 1;
 
                 System.err.println("恭喜你中了一等奖");
-                String url = "https://api.day.app/VizApLTywWLsn4eUjHADRC/"+"你暴富了兄弟";
+                String url = "https://api.day.app/VizApLTywWLsn4eUjHADRC/" + "你暴富了兄弟";
             } else {
                 System.err.println("您未中奖，感谢你为福利事业做出贡献!!!");
             }
@@ -104,8 +100,18 @@ public class taskRunner {
             System.out.println("中奖数" + count);
 
         }
-        String url = "https://api.day.app/VizApLTywWLsn4eUjHADRC/" + "本期福利全色球:中奖" + count + "组   金额：" + money;
+        String url = "https://api.day.app/VizApLTywWLsn4eUjHADRC/" + "本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
+        String serverUrl = "https://sctapi.ftqq.com/SCT142384Tq64Jxx4Jde2xQDQjct36FD4Z.send";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        // 设置请求参数
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("text", "中奖通知");
+        String desp = "本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
+        params.add("desp", desp);
         HttpUtil.get(url);
+
+        new RestTemplate().exchange(serverUrl, org.springframework.http.HttpMethod.POST, new HttpEntity<>(params, headers), String.class);
     }
 
 
@@ -126,15 +132,13 @@ public class taskRunner {
     }
 
 
-
     /**
      * 获取最新一期双色球
      *
      * @return
      * @throws UnsupportedEncodingException
      */
-    public static String[] getLastSsq() throws UnsupportedEncodingException {
-
+    public String[] getLastSsq() throws UnsupportedEncodingException {
         String ssq = null;
         String url = "http://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice?name=ssq&issueCount=1";
         Map<String, String> head = new HashMap<String, String>();
