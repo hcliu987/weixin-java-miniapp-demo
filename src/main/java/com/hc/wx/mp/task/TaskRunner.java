@@ -101,6 +101,7 @@ public class TaskRunner {
 
         }
         String url = "https://api.day.app/VizApLTywWLsn4eUjHADRC/" + "本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
+        String urlh = "https://api.day.app/eT7PCeRCwrZr5MfmDnE7gY/" + "本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
         String serverUrl = "https://sctapi.ftqq.com/SCT142384Tq64Jxx4Jde2xQDQjct36FD4Z.send";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -110,6 +111,8 @@ public class TaskRunner {
         String desp = "本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
         params.add("desp", desp);
         HttpUtil.get(url);
+        HttpUtil.get(urlh);
+
 
         new RestTemplate().exchange(serverUrl, org.springframework.http.HttpMethod.POST, new HttpEntity<>(params, headers), String.class);
     }

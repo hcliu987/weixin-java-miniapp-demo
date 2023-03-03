@@ -25,7 +25,7 @@ public class Job {
             .usingJobData(jobDataMap)
             .build();
         CronTrigger trigger = TriggerBuilder.newTrigger().withIdentity("trigger", "group")
-            .withSchedule(CronScheduleBuilder.cronSchedule("0/1  * * ? * 1,3,5"))
+            .withSchedule(CronScheduleBuilder.cronSchedule("0/1  * * ? * 1,3,6"))
             .build();
         Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
         scheduler.scheduleJob(jobDetail,trigger);
