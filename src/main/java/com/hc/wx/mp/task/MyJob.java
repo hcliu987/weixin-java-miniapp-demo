@@ -13,12 +13,13 @@ public class MyJob implements Job {
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         ArrayList<int []> myMunbers = (ArrayList<int[]>) jobDataMap.get("param");
+       String name= (String) jobDataMap.get("user");
         System.out.println("定时任务开始执行");
         TaskRunner taskRunner=new TaskRunner();
 
 
         try {
-            taskRunner.run(myMunbers);
+            taskRunner.run(myMunbers,name);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

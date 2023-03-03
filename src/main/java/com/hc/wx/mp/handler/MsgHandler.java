@@ -52,7 +52,13 @@ public class MsgHandler extends AbstractHandler {
         }
 
 
-        if (wxMessage.getFromUser().equals("oDVX56e9DU6GqAKNwJ9xsU9axKFs") || wxMessage.getFromUser().equals("oDVX56bDrhCpo1Ox1bbq6DAGuXJ4")) {
+        if (wxMessage.getContent().length()>20){
+
+        }
+
+        if (wxMessage.getContent().length() > 20) {
+
+
             TaskRunner t = new TaskRunner();
 
             String msg = wxMessage.getContent().replace("-", " ");
@@ -66,6 +72,7 @@ public class MsgHandler extends AbstractHandler {
             }
             JobDataMap jobDataMap = new JobDataMap();
             jobDataMap.put("param", objects);
+            jobDataMap.put("user",wxMessage.getFromUser());
             JobDetail jobDetail = JobBuilder.newJob(MyJob.class)
                 .withIdentity("job", "group")
                 .usingJobData(jobDataMap)
@@ -81,9 +88,8 @@ public class MsgHandler extends AbstractHandler {
             } catch (SchedulerException e) {
                 throw new RuntimeException(e);
             }
-
-
         }
+
         //TODO 组装回复消息
         String content = analysisJson(get2(wxMessage.getContent()));
         if (content.length() < 1) {

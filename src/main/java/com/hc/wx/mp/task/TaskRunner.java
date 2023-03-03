@@ -31,8 +31,8 @@ public class TaskRunner {
     public static int money = 0;
 
 
-   // @Scheduled(cron = "10 41 22 ? * 2,4,7")
-    public void run(ArrayList<int[]> myNumbers) throws UnsupportedEncodingException {
+    // @Scheduled(cron = "10 41 22 ? * 2,4,7")
+    public void run(ArrayList<int[]> myNumbers, String name) throws UnsupportedEncodingException {
         int redNumbers = 0;
         int blueNumbers = 0;
         String[] luckyNumbers = getLastSsq();
@@ -100,8 +100,16 @@ public class TaskRunner {
             System.out.println("中奖数" + count);
 
         }
-        String url = "https://api.day.app/VizApLTywWLsn4eUjHADRC/" + "本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
-        String urlh = "https://api.day.app/eT7PCeRCwrZr5MfmDnE7gY/" + "本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
+        String uToken = "";
+
+        if (name.equals("oDVX56e9DU6GqAKNwJ9xsU9axKFs")) {
+            uToken="eT7PCeRCwrZr5MfmDnE7gY";
+        }
+        if (name.equals("oDVX56bDrhCpo1Ox1bbq6DAGuXJ4")||name.equals("hc")) {
+
+            uToken="VizApLTywWLsn4eUjHADRC";
+        }
+        String url = "https://api.day.app/" +uToken +"/本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
         String serverUrl = "https://sctapi.ftqq.com/SCT142384Tq64Jxx4Jde2xQDQjct36FD4Z.send";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -111,7 +119,6 @@ public class TaskRunner {
         String desp = "本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
         params.add("desp", desp);
         HttpUtil.get(url);
-        HttpUtil.get(urlh);
 
 
         new RestTemplate().exchange(serverUrl, org.springframework.http.HttpMethod.POST, new HttpEntity<>(params, headers), String.class);

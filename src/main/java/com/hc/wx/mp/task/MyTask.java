@@ -23,7 +23,7 @@ public class MyTask {
         myNumbers.add(new int[]{7, 11, 20, 23, 25, 32, 1});
         System.out.println();
         try {
-            taskRunner.run(myNumbers);
+            taskRunner.run(myNumbers,"hc");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
