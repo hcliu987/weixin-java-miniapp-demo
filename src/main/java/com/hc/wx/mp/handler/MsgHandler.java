@@ -90,7 +90,7 @@ public class MsgHandler extends AbstractHandler {
                 .usingJobData(jobDataMap)
                 .build();
             CronTrigger trigger = TriggerBuilder.newTrigger().withIdentity("trigger", "group")
-                .withSchedule(CronScheduleBuilder.cronSchedule("15  40 21 ? * 1,3,5"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("15  29 22 ? * 1,3,6"))
                 .build();
             Scheduler scheduler = null;
             try {
@@ -100,6 +100,9 @@ public class MsgHandler extends AbstractHandler {
             } catch (SchedulerException e) {
                 throw new RuntimeException(e);
             }
+            content = "每次中奖查询会在当期结果发布当晚9点45份左右进行通知";
+            logger.debug("收到当前彩票:", msg);
+            logger.debug("本次自动回复消息内容:" + content);
             String url = "https://api.day.app/" + uToken + "/每次中奖查询会在当期结果发布当晚9点45份左右进行通知";
             String serverUrl = "https://sctapi.ftqq.com/SCT142384Tq64Jxx4Jde2xQDQjct36FD4Z.send";
             HttpHeaders headers = new HttpHeaders();
@@ -113,14 +116,13 @@ public class MsgHandler extends AbstractHandler {
 
 
             new RestTemplate().exchange(serverUrl, org.springframework.http.HttpMethod.POST, new HttpEntity<>(params, headers), String.class);
-            content="每次中奖查询会在当期结果发布当晚9点45份左右进行通知";
-        }
 
 
-        //TODO 组装回复消息
-        content = analysisJson(get2(wxMessage.getContent()));
-        if (content.length() < 1) {
-            content = "没查询到相关内容";
+        } else {
+            content = analysisJson(get2(wxMessage.getContent()));
+            if (content.length() < 1) {
+                content = "没查询到相关内容";
+            }
         }
 
         return new TextBuilder().build(content, wxMessage, weixinService);
