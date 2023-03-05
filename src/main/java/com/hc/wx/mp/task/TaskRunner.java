@@ -33,6 +33,16 @@ public class TaskRunner {
 
     // @Scheduled(cron = "10 41 22 ? * 2,4,7")
     public void run(ArrayList<int[]> myNumbers, String name) throws UnsupportedEncodingException {
+        String uToken = "";
+
+        if (name.equals("oDVX56e9DU6GqAKNwJ9xsU9axKFs")) {
+            uToken="eT7PCeRCwrZr5MfmDnE7gY";
+        }
+        if (name.equals("oDVX56bDrhCpo1Ox1bbq6DAGuXJ4")||name.equals("hc")) {
+
+            uToken="VizApLTywWLsn4eUjHADRC";
+
+        }
         int redNumbers = 0;
         int blueNumbers = 0;
         String[] luckyNumbers = getLastSsq();
@@ -100,15 +110,8 @@ public class TaskRunner {
             System.out.println("中奖数" + count);
 
         }
-        String uToken = "";
 
-        if (name.equals("oDVX56e9DU6GqAKNwJ9xsU9axKFs")) {
-            uToken="eT7PCeRCwrZr5MfmDnE7gY";
-        }
-        if (name.equals("oDVX56bDrhCpo1Ox1bbq6DAGuXJ4")||name.equals("hc")) {
 
-            uToken="VizApLTywWLsn4eUjHADRC";
-        }
         String url = "https://api.day.app/" +uToken +"/本期福利全色球号码" + Arrays.toString(luckyNumbers) + ":中奖" + count + "组,中奖金额：" + money;
         String serverUrl = "https://sctapi.ftqq.com/SCT142384Tq64Jxx4Jde2xQDQjct36FD4Z.send";
         HttpHeaders headers = new HttpHeaders();

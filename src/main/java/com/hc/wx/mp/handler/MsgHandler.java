@@ -17,7 +17,13 @@ import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -38,6 +44,7 @@ public class MsgHandler extends AbstractHandler {
             //TODO 可以选择将消息保存到本地
         }
 
+        String uToken = "";
         //当用户输入关键词如“你好”，“客服”等，并且有客服在线时，把消息转发给在线客服
         try {
             if (StringUtils.startsWithAny(wxMessage.getContent(), "你好", "客服")
@@ -50,13 +57,18 @@ public class MsgHandler extends AbstractHandler {
         } catch (WxErrorException e) {
             e.printStackTrace();
         }
-
-
-        if (wxMessage.getContent().length()>20){
-
-        }
+        String content = "";
 
         if (wxMessage.getContent().length() > 20) {
+
+            if (wxMessage.getFromUser().equals("oDVX56e9DU6GqAKNwJ9xsU9axKFs")) {
+                uToken = "eT7PCeRCwrZr5MfmDnE7gY";
+            }
+            if (wxMessage.getFromUser().equals("oDVX56bDrhCpo1Ox1bbq6DAGuXJ4")) {
+
+                uToken = "VizApLTywWLsn4eUjHADRC";
+
+            }
 
 
             TaskRunner t = new TaskRunner();
@@ -72,7 +84,7 @@ public class MsgHandler extends AbstractHandler {
             }
             JobDataMap jobDataMap = new JobDataMap();
             jobDataMap.put("param", objects);
-            jobDataMap.put("user",wxMessage.getFromUser());
+            jobDataMap.put("user", wxMessage.getFromUser());
             JobDetail jobDetail = JobBuilder.newJob(MyJob.class)
                 .withIdentity("job", "group")
                 .usingJobData(jobDataMap)
@@ -88,10 +100,25 @@ public class MsgHandler extends AbstractHandler {
             } catch (SchedulerException e) {
                 throw new RuntimeException(e);
             }
+            String url = "https://api.day.app/" + uToken + "/每次中奖查询会在当期结果发布当晚9点45份左右进行通知";
+            String serverUrl = "https://sctapi.ftqq.com/SCT142384Tq64Jxx4Jde2xQDQjct36FD4Z.send";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            // 设置请求参数
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("text", "中奖通知");
+            String desp = "每次中奖查询会在当期结果发布当晚9点45份左右进行通知";
+            params.add("desp", desp);
+            HttpUtil.get(url);
+
+
+            new RestTemplate().exchange(serverUrl, org.springframework.http.HttpMethod.POST, new HttpEntity<>(params, headers), String.class);
+            content="每次中奖查询会在当期结果发布当晚9点45份左右进行通知";
         }
 
+
         //TODO 组装回复消息
-        String content = analysisJson(get2(wxMessage.getContent()));
+        content = analysisJson(get2(wxMessage.getContent()));
         if (content.length() < 1) {
             content = "没查询到相关内容";
         }
