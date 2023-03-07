@@ -2,7 +2,9 @@ package com.hc.wx.mp.controller;
 
 import io.restassured.RestAssured;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
+import java.io.File;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +21,13 @@ public abstract class BaseControllerTest {
     @BeforeTest
     public void setup() {
         RestAssured.baseURI = ROOT_URL;
+    }
+
+
+
+    @Test
+    public  void test(){
+
     }
 
 }

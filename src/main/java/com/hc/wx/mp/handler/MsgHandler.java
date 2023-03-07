@@ -90,7 +90,7 @@ public class MsgHandler extends AbstractHandler {
                 .usingJobData(jobDataMap)
                 .build();
             CronTrigger trigger = TriggerBuilder.newTrigger().withIdentity("trigger", "group")
-                .withSchedule(CronScheduleBuilder.cronSchedule("15  29 22 ? * 1,3,6"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("15  50 13 ? * 1,3,6"))
                 .build();
             Scheduler scheduler = null;
             try {
