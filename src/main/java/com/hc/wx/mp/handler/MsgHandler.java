@@ -66,9 +66,6 @@ public class MsgHandler extends AbstractHandler {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        if (content.length() < 1) {
-            content = "没查询到相关内容";
-        }
         logger.info("当前用户{}查询的内容:{}", wxMessage.getFromUser(),wxMessage.getContent());
         logger.info("当前用户查询的结果:{}", content);
         return new TextBuilder().build(content, wxMessage, weixinService);
@@ -79,30 +76,28 @@ public class MsgHandler extends AbstractHandler {
     private static String messageTest(String text) throws Exception {
 
 
-        String getTTZJB = null;
-        String getJuzi = null;
+//        String getTTZJB = null;
+//        String getJuzi = null;
         String sortWeb = null;
         try {
-            getTTZJB = analysisJson(getTTZJB(text));
-            getJuzi = analysisJson(getJuzi(text));
+//            getTTZJB = analysisJson(getTTZJB(text));
+//            getJuzi = analysisJson(getJuzi(text));
             sortWeb = analysisJson(sortWeb(text));
             System.out.println("sortWeb = " + sortWeb);
-            if(getTTZJB.length()<=8||getJuzi.length()<=8||sortWeb.length()<=8){
+//            if(sortWeb.length()<=8||getJuzi.length()<=8||sortWeb.length()<=8){
+//                return "没查询到相关内容";
+//            }
+            if (sortWeb.length()<=8){
                 return "没查询到相关内容";
             }
         } catch (Exception e) {
             HttpUtil.get("https://api.day.app/VizApLTywWLsn4eUjHADRC/自助影视资源查询发生异常" + e.getMessage());
         }
-        if (sortWeb.length() > 1) {
+        if (sortWeb.length() > 8) {
 
-            return sortWeb.length()<600?sortWeb:sortWeb.substring(0,600);
+            return sortWeb.length()<600?sortWeb:sortWeb.substring(0,300);
         }
-        if (getTTZJB.length() > getJuzi.length()) {
-            return getTTZJB.length()<600?getTTZJB:getTTZJB.substring(0,600);
-        }
-        if (getJuzi.length() > getTTZJB.length()) {
-            return getJuzi.length()<600?getJuzi:getJuzi.substring(0,600);
-        }
+
 
         return "没查询到相关内容";
     }
