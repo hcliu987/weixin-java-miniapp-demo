@@ -1,0 +1,31 @@
+wx:
+  mp:
+    configs:
+      - appId: wx738d5cd928816fa0
+        secret: 4e262bf21fb03bc20a5140ed2a888f5f
+        token: hcliu
+        aesKey: ENC(XGOwI4PgJuIxTTdqh6SY6xyXVme5ht5alJKAn9LU34qSxhaHfyoBMkLE0elUjcvTYeSd2P/S0Ew=)
+server:
+  port: 80
+
+
+notice:
+  configs:
+    - brakId: WXbF6u6v6iKfPyVD5ttCgK
+
+lottery:
+  APPID: vinnsglluwk0brol
+  APPSECRET: HbKwaYgoIr1DhFFZ9rFoHEHhHZB1bYUT
+
+jasypt:
+  encryptor:
+    # 盐值
+    password: 271886
+    # 指定加密方式
+    algorithm: PBEWithMD5AndDES
+    iv-generator-classname: org.jasypt.iv.NoIvGenerator
+    property:
+      # 标识为加密属性的前缀
+      prefix: ENC(
+      # 标识为加密属性的后缀
+      suffix: )
