@@ -18,6 +18,13 @@ lottery:
   APPID: vinnsglluwk0brol
   APPSECRET: HbKwaYgoIr1DhFFZ9rFoHEHhHZB1bYUT
 
+spring:
+  redis:
+    host: 43.143.16.205
+    port: 6380
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 #jasypt:
 #  encryptor:
 #    # 盐值

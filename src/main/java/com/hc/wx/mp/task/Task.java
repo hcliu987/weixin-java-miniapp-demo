@@ -1,22 +1,39 @@
 package com.hc.wx.mp.task;
 
+import cn.hutool.core.date.DateUnit;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.http.Method;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.hc.wx.mp.config.LotteryProperties;
+import com.hc.wx.mp.config.RedisCache;
+import com.hc.wx.mp.entity.User;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Slf4j
+@Component
 public class Task {
+
+
+    @Autowired
+    RedisCache redisCache;
+
     public static void notice(ResultMsg bean) {
-        String url = "https://api.day.app/WXbF6u6v6iKfPyVD5ttCgK/本期福利双色球号码:" + bean.getData().getOpenCode() + "购买号码:" + bean.getData().getCheckedCode() + ",中奖金额：" + bean.getData().getResultDetails()+"?icon=https://file2.rrxh5.cc/g2/c1/2018/09/20/1537439909849.png";
+        String url = "https://api.day.app/WXbF6u6v6iKfPyVD5ttCgK/本期福利双色球号码:" + bean.getData().getOpenCode() + "购买号码:" + bean.getData().getCheckedCode() + ",中奖金额：" + bean.getData().getResultDetails() + "?icon=https://file2.rrxh5.cc/g2/c1/2018/09/20/1537439909849.png";
         String serverUrl = "https://sctapi.ftqq.com/SCT142384Tq64Jxx4Jde2xQDQjct36FD4Z.send";
         String pushdeerUrl = "https://api2.pushdeer.com/message/push?pushkey=PDU21229TiqefGW5MIxU3C69S5KhM5efHWhtKpCUP&text=" + "/本期福利双色球号码:" + bean.getData().getOpenCode() + "购买号码：" + bean.getData().getCheckedCode() + " 中奖金额：" + bean.getData().getResultDetails();
         HttpHeaders headers = new HttpHeaders();
@@ -41,7 +58,7 @@ public class Task {
     /**
      * 根据购买单号查询中奖资格
      */
-    public  void check(List<String> myNumbers, LotteryProperties lotteryProperties) throws InterruptedException {
+    public void check(List<String> myNumbers, LotteryProperties lotteryProperties) throws InterruptedException {
         String expect = lastExpect(lotteryProperties);
         if (!myNumbers.isEmpty()) {
             for (int i = 0; i < myNumbers.size(); i++) {
@@ -61,17 +78,66 @@ public class Task {
     }
 
     public static void main(String[] args) throws UnsupportedEncodingException, InterruptedException {
-        List myNumbers = new ArrayList<String>();
-        myNumbers.add("3,7,12,16,20,27@11");
-        myNumbers.add("5,10,15,21,24,28@9");
-        myNumbers.add("2,11,13,19,26,32@6");
 
-        TaskRunner task = new TaskRunner();
-        LotteryProperties lotteryProperties = new LotteryProperties();
-        lotteryProperties.setAPPID("vinnsglluwk0brol");
-        lotteryProperties.setAPPSECRET("HbKwaYgoIr1DhFFZ9rFoHEHhHZB1bYUT");
 
-       // check(myNumbers, lotteryProperties);
+    }
+
+
+    public void appointmentResults() {
+        String version = getMTVersion();
+        log.info("申购结果查询开始=========================");
+
+
+        List<User> users = redisCache.getCacheList("user_list");
+
+
+
+        for (User user : users) {
+            try {
+                String url = "https://app.moutai519.com.cn/xhr/front/mall/reservation/list/pageOne/query";
+                String body = HttpUtil.createRequest(Method.GET, url)
+                        .header("MT-Device-ID", user.getDeviceId())
+                        .header("MT-APP-Version", version)
+                        .header("MT-Token", user.getToken())
+                        .header("User-Agent", "iOS;16.3;Apple;?unrecognized?").execute().body();
+                JSONObject jsonObject = JSONObject.parseObject(body);
+                System.out.println(jsonObject.toString());
+                if (jsonObject.getInteger("code") != 2000) {
+                    String message = jsonObject.getString("message");
+                    throw new Exception(message);
+                }
+                for (Object itemVOs : jsonObject.getJSONObject("data").getJSONArray("reservationItemVOS")) {
+                    JSONObject item = JSON.parseObject(itemVOs.toString());
+                    // 预约时间在24小时内的
+                    if (item.getInteger("status") == 2 && DateUtil.between(item.getDate("reservationTime"), new Date(), DateUnit.HOUR) < 24) {
+                        String logContent = DateUtil.formatDate(item.getDate("reservationTime")) + " 申购" + item.getString("itemName") + "成功";
+                        String urlBark = "https://api.day.app/WXbF6u6v6iKfPyVD5ttCgK/" + logContent;
+                        HttpUtil.get(url);
+                        log.info("\n调用通知信息：[{}]", url);
+                    }
+
+                }
+            } catch (Exception e) {
+                log.error("查询申购结果失败:失败原因{}", e.getMessage());
+            }
+
+        }
+        log.info("申购结果查询结束=========================");
+    }
+
+    private static String getMTVersion() {
+        String mtVersion = "";
+
+        String url = "https://apps.apple.com/cn/app/i%E8%8C%85%E5%8F%B0/id1600482450";
+        String htmlContent = HttpUtil.get(url);
+        Pattern pattern = Pattern.compile("new__latest__version\">(.*?)</p>", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(htmlContent);
+        if (matcher.find()) {
+            mtVersion = matcher.group(1);
+            mtVersion = mtVersion.replace("版本 ", "");
+        }
+
+        return mtVersion;
     }
 
     /**

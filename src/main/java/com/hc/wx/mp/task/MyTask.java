@@ -8,6 +8,8 @@ import okhttp3.*;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,7 +19,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
-@Component
+    @Component
 @Slf4j
 public class MyTask {
 
@@ -50,12 +52,14 @@ public class MyTask {
         log.info("\n调用通知信息：[{}]", pushPlus);
     }
 
-    @Scheduled(cron = "15 15 22 ? * 2,4,7")
+    @Scheduled(cron = "15 45 21 ? * 2,4,7")
     public void run() throws InterruptedException {
         List myNumbers = new ArrayList<String>();
         myNumbers.add("3,7,12,16,20,27@11");
         myNumbers.add("5,10,15,21,24,28@9");
         myNumbers.add("2,11,13,19,26,32@6");
+        myNumbers.add("1,13,15,29,30,31@12");
+        myNumbers.add("4,9,10,11,23,27@5");
 //        System.out.println();
 //        try {
 //            taskRunner.run(myNumbers, "hc");
@@ -112,14 +116,17 @@ public class MyTask {
 
 
     // @Scheduled(cron = "0 8 8 * * ")
-    public static void deleteAll() throws Exception {
-
+    @Scheduled(cron = " 0 30 18 * * ?")
+    public  void task() throws Exception {
+        task.appointmentResults();
 
     }
 
     public static void main(String[] args) throws Exception {
-        String url = "https://api.day.app/WXbF6u6v6iKfPyVD5ttCgK/i茅台游戏开始了?icon=https://picnew3.photophoto.cn/20090527/guizhoumaotaibiaozhitupian-10975341_1.jpg";
-        HttpUtil.get(url);
+        ClassPathXmlApplicationContext classPathXmlApplicationContext = new ClassPathXmlApplicationContext("application.yml");
+        MyTask bean = classPathXmlApplicationContext.getBean(MyTask.class);
+        System.out.println(bean);
+
     }
 
 }
