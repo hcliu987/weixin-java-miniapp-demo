@@ -25,7 +25,6 @@ public class WxMpDemoApplication  {
 
     public static void main(String[] args) throws UnknownHostException {
         ConfigurableApplicationContext run = SpringApplication.run(WxMpDemoApplication.class, args);
-        System.out.println(run.getEnvironment().getProperty("wx.mp.configs[0].aesKey"));
     }
 
 }

@@ -5,5 +5,7 @@
 	"groupId":"1",
 	"id":"1",
 	"name":"Default Group",
+	"pmRequestId":"",
+	"pmResponseId":"",
 	"type":1
 }

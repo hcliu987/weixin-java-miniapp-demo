@@ -1,6 +1,7 @@
 package com.hc.wx.mp.handler;
 
 import com.hc.wx.mp.utils.JsonUtils;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
@@ -9,9 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
- */
 @Component
 public class LogHandler extends AbstractHandler {
     @Override

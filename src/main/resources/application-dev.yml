@@ -7,7 +7,7 @@ wx:
         aesKey: LHznZTiUOlwohmxktYHFlFQJYnQMeCFPCw8J2QsUHGK
         #aesKey: ENC(XGOwI4PgJuIxTTdqh6SY6xyXVme5ht5alJKAn9LU34qSxhaHfyoBMkLE0elUjcvTYeSd2P/S0Ew=)
 server:
-  port: 80
+  port: 8088
 
 
 notice:
