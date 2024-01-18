@@ -58,3 +58,8 @@ build/
 
 ### log ###
 logs/
+
+### fastrequest ###
+.fastRequest
+###jrebel ###
+rebel.xml

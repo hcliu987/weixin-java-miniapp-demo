@@ -1,13 +1,13 @@
 wx:
   mp:
     configs:
-      - appId: wx738d5cd928816fa0
-        secret: 4e262bf21fb03bc20a5140ed2a888f5f
+      - appId: wx6a36791feb98c796
+        secret: 59538ba157b64d663001e273740c3ccb
         token: hcliu
         aesKey: LHznZTiUOlwohmxktYHFlFQJYnQMeCFPCw8J2QsUHGK
         #aesKey: ENC(XGOwI4PgJuIxTTdqh6SY6xyXVme5ht5alJKAn9LU34qSxhaHfyoBMkLE0elUjcvTYeSd2P/S0Ew=)
 server:
-  port: 8088
+  port: 80
 
 
 notice:

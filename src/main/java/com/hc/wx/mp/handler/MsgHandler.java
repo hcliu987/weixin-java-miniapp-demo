@@ -8,6 +8,7 @@ import com.hc.wx.mp.builder.TextBuilder;
 import com.hc.wx.mp.config.LotteryProperties;
 import com.hc.wx.mp.config.RedisCache;
 import com.hc.wx.mp.entity.JsonsRootBean;
+import com.hc.wx.mp.entity.LUser;
 import com.hc.wx.mp.entity.Lists;
 import com.hc.wx.mp.task.Task;
 import lombok.Data;
@@ -28,10 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
 
@@ -59,16 +57,22 @@ public class MsgHandler extends AbstractHandler {
         }
 
         String content = wxMessage.getContent();
-        if (wxMessage.getToUser().equals("gh_40edbd47dfdd")) {
+        Task task = new Task();
+        String fromUser = wxMessage.getFromUser();
+        if (content.length() > 20) {
 
-            if (content.length() > 20 && content.contains("\n") && content.contains("@")) {
-                //获取最新一期
-                String lastExpect = Task.lastExpect(lotteryProperties);
-                List myNumbers = Arrays.asList(content.split("\n"));
-
-            }
+           // content.replace(" ",",").split("\n");
+            List<String> list = Arrays.asList( content.replace(" ",",").replace("-","@").split("\n"));
+            System.out.println("当前彩票" + list);
+            LUser u = new LUser();
+            u.setId(fromUser);
+            u.setMyNumbers(list);
+            u.setLast(task.lastExpect(lotteryProperties));
+            redisCache.setCacheObject("wx:"+wxMessage.getFromUser(), u);
+            return new TextBuilder().build("当期结果会在当期开彩票以后进行通知", wxMessage, weixinService);
         }
-        String uToken = "";
+        System.out.println("获取当前用户输出内容" + wxMessage.getFromUser());
+        System.out.println(wxMessage.getToUser());
 
 
         try {
@@ -76,8 +80,7 @@ public class MsgHandler extends AbstractHandler {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        logger.info("当前用户{}查询的内容:{}", wxMessage.getFromUser(), wxMessage.getContent());
-        logger.info("当前用户查询的结果:{}", content);
+        logger.info("当前用户{}查询的内容:{}", fromUser, content);
         return new TextBuilder().build(content, wxMessage, weixinService);
 
     }
@@ -110,7 +113,7 @@ public class MsgHandler extends AbstractHandler {
     public static String getKK(String text) throws Exception {
         OkHttpClient client = new OkHttpClient();
 
-        String token=getToken();
+        String token = getToken();
         String encode = URLEncoder.encode(text, "UTF-8");
 
         RequestBody formBody = new FormBody.Builder()
@@ -128,7 +131,7 @@ public class MsgHandler extends AbstractHandler {
                 .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                 .header("Origin", "http://m.9dups.com")
                 .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15")
-                .header("Referer", "http://m.9dups.com/app/index.html?name=%"+encode+"&id=test&token="+token)
+                .header("Referer", "http://m.9dups.com/app/index.html?name=%" + encode + "&id=test&token=" + token)
                 .header("Cookie", "Hm_lpvt_0606cc863fe63b0953d06585b4897bcb=1705107327; Hm_lvt_0606cc863fe63b0953d06585b4897bcb=1704955344")
                 .header("Proxy-Connection", "keep-alive")
                 .build();
@@ -189,5 +192,6 @@ public class MsgHandler extends AbstractHandler {
 
         System.out.println(messageTest("繁花"));
     }
+
 
 }

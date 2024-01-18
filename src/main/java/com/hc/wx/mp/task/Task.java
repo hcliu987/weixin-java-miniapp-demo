@@ -10,10 +10,14 @@ import com.alibaba.fastjson2.JSONObject;
 import com.hc.wx.mp.config.LotteryProperties;
 import com.hc.wx.mp.config.NoticeProperties;
 import com.hc.wx.mp.config.RedisCache;
+import com.hc.wx.mp.entity.LUser;
 import com.hc.wx.mp.entity.MtUser;
 import lombok.Data;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
+import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +32,8 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 public class Task {
+    @Autowired
+    WxMpService wxService;
     @Autowired
     private LotteryProperties lotteryProperties;
 
@@ -59,7 +65,6 @@ public class Task {
                         .header("MT-Token", user.getToken())
                         .header("User-Agent", "iOS;16.3;Apple;?unrecognized?").execute().body();
                 JSONObject jsonObject = JSONObject.parseObject(body);
-                System.out.println(jsonObject.toString());
                 if (jsonObject.getInteger("code") != 2000) {
                     String message = jsonObject.getString("message");
                     throw new Exception(message);
@@ -101,9 +106,11 @@ public class Task {
     /**
      * 根据购买单号查询中奖资格
      */
-    public void check(List<String> myNumbers, LotteryProperties lotteryProperties, NoticeProperties properties) throws InterruptedException {
-        String expect = lastExpect(lotteryProperties);
+    public void check(List<String> myNumbers, String expect, LotteryProperties lotteryProperties, NoticeProperties properties) throws InterruptedException {
+        log.info("任务开始");
+        log.info(expect);
         if (!myNumbers.isEmpty()) {
+            log.info(myNumbers.size() + "");
             for (int i = 0; i < myNumbers.size(); i++) {
                 TimeUnit.SECONDS.sleep(1);
                 Map<String, Object> paramMap = new HashMap<>();
@@ -114,7 +121,8 @@ public class Task {
                 paramMap.put("app_secret", lotteryProperties.getAPPSECRET());
                 String result = HttpUtil.get("https://www.mxnzp.com/api/lottery/common/check", paramMap);
                 ResultMsg bean = JSONUtil.toBean(result, ResultMsg.class);
-
+                System.out.println(bean.toString());
+                properties.setBrakId("VVtPqTFKkTfBFLorEvLDX3");
                 if (!bean.getData().resultDetails.contains("暂未中奖")) {
                     notice(bean, properties.getBrakId());
                 }
@@ -150,7 +158,7 @@ public class Task {
     /**
      * 获取最新一期彩票号
      */
-    public static String lastExpect(LotteryProperties lotteryProperties) {
+    public String lastExpect(LotteryProperties lotteryProperties) {
 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("code", "ssq");
@@ -163,6 +171,47 @@ public class Task {
 
         return bean.getData().get(0).getExpect();
 
+    }
+
+    public void check(LUser user, LotteryProperties lotteryProperties, NoticeProperties properties) {
+        if (user != null) {
+            user.getMyNumbers().stream().forEach(
+                    myNumbers -> {
+                        try {
+                            TimeUnit.SECONDS.sleep(1);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        Map<String, Object> paramMap = new HashMap<>();
+                        paramMap.put("code", "ssq");
+                        paramMap.put("expect", user.getLast());
+                        paramMap.put("lotteryNo", myNumbers
+                        );
+                        paramMap.put("app_id", lotteryProperties.getAPPID());
+                        paramMap.put("app_secret", lotteryProperties.getAPPSECRET());
+                        String result = HttpUtil.get("https://www.mxnzp.com/api/lottery/common/check", paramMap);
+                        System.out.println(result);
+                        ResultMsg bean = JSONUtil.toBean(result, ResultMsg.class);
+
+                        if (!bean.getData().resultDetails.contains("暂未中奖")) {
+                            Map<String, Object> param = new HashMap<>();
+                            param.put("touser", user.getId());
+                            param.put("template_id", "pnNH0Sm2BZJc_Fj1ndbE9lKb6oBNMPUt0kVmcCA5GXA");
+                            param.put("url", "");
+                            Map<String, WeChatTemplateMsg> moeny = new HashMap<>();
+
+                            System.out.println(bean.getData().getResultDetails().toString());
+                            moeny.put("result", new WeChatTemplateMsg(bean.getData().getResultDetails().toString()));
+                            moeny.put("last", new WeChatTemplateMsg(bean.getData().getExpect()));
+                            moeny.put("list", new WeChatTemplateMsg(bean.getData().getCheckedCode()));
+                            param.put("data", moeny);
+                            String post = HttpUtil.get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx6a36791feb98c796&secret=59538ba157b64d663001e273740c3ccb");
+                            String string = JSONUtil.parseObj(param).toString();
+                            String resultChat = HttpUtil.post("https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" + JSONUtil.parseObj(post).getStr("access_token"), string);
+                        }
+                    }
+            );
+        }
     }
 
 
@@ -210,8 +259,29 @@ public class Task {
         private String time;
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        Task task = new Task();
-        task.appointmentResults();
+
+    @Data
+    class WeChatTemplateMsg {
+        /**
+         * 消息
+         */
+        private String value;
+        /**
+         * 消息颜色
+         */
+        private String color;
+
+
+        public WeChatTemplateMsg(String value) {
+            this.value = value;
+            this.color = "#173177";
+        }
+
+        public WeChatTemplateMsg(String value, String color) {
+            this.value = value;
+            this.color = color;
+        }
+
     }
+
 }
