@@ -174,6 +174,7 @@ public class Task {
     }
 
     public void check(LUser user, LotteryProperties lotteryProperties, NoticeProperties properties) {
+        //彩票消息公众号对话框订阅
         //消息模板取消
 //        if (user != null) {
 //            user.getMyNumbers().stream().forEach(
