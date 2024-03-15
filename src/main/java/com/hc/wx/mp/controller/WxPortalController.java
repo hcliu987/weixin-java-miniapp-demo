@@ -73,28 +73,6 @@ public class WxPortalController {
         if (!wxService.checkSignature(timestamp, nonce, signature)) {
             throw new IllegalArgumentException("非法请求，可能属于伪造的请求！");
         }
-
-//        String out = null;
-//        if (encType == null) {
-//            // 明文传输的消息
-//            WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
-//            WxMpXmlOutMessage outMessage = this.route(inMessage);
-//            if (outMessage == null) {
-//                return "";
-//            }
-//            out = outMessage.toXml();
-//        } else if ("aes".equalsIgnoreCase(encType)) {
-//            // aes加密的消息
-//            WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(requestBody, wxService.getWxMpConfigStorage(),
-//                timestamp, nonce, msgSignature);
-//            log.debug("\n消息解密后内容为：\n{} ", inMessage.toString());
-//            WxMpXmlOutMessage outMessage = this.route(inMessage);
-//            if (outMessage == null) {
-//                return "";
-//            }
-//
-//            out = outMessage.toEncryptedXml(wxService.getWxMpConfigStorage());
-//        }
         WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
         WxMpXmlOutMessage outMessage = this.route(inMessage);
         if (outMessage == null) {
@@ -110,7 +88,6 @@ public class WxPortalController {
         try {
             return this.messageRouter.route(message);
         } catch (Exception e) {
-            HttpUtil.get( HttpUtil.get("https://api.day.app/VizApLTywWLsn4eUjHADRC/自助影视资源查询发生异常" + e.getMessage()));
             log.error("路由消息时出现异常！", e);
         }
 
