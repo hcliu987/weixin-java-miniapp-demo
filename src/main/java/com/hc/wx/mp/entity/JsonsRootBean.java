@@ -17,4 +17,5 @@ public class JsonsRootBean {
     private boolean us;
     private List<Lists> list;
     private boolean cache;
+    private  String msg;
 }

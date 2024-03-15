@@ -10,9 +10,11 @@ import com.hc.wx.mp.config.RedisCache;
 import com.hc.wx.mp.entity.JsonsRootBean;
 import com.hc.wx.mp.entity.LUser;
 import com.hc.wx.mp.entity.Lists;
+import com.hc.wx.mp.service.SearchService;
 import com.hc.wx.mp.task.Task;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
@@ -22,14 +24,20 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import javax.naming.directory.SearchResult;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpResponse;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 import static me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
 
@@ -47,6 +55,9 @@ public class MsgHandler extends AbstractHandler {
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    SearchService service;
+
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage,
                                     Map<String, Object> context, WxMpService weixinService,
@@ -61,22 +72,23 @@ public class MsgHandler extends AbstractHandler {
         String fromUser = wxMessage.getFromUser();
         if (content.length() > 20) {
 
-           // content.replace(" ",",").split("\n");
-            List<String> list = Arrays.asList( content.replace(" ",",").replace("-","@").split("\n"));
+            // content.replace(" ",",").split("\n");
+            List<String> list = Arrays.asList(content.replace(" ", ",").replace("-", "@").split("\n"));
             System.out.println("当前彩票" + list);
             LUser u = new LUser();
             u.setId(fromUser);
             u.setMyNumbers(list);
             u.setLast(task.lastExpect(lotteryProperties));
-            redisCache.setCacheObject("wx:"+wxMessage.getFromUser(), u);
+            redisCache.setCacheObject("wx:" + wxMessage.getFromUser(), u);
             return new TextBuilder().build("当期结果会在当期开彩票以后进行通知", wxMessage, weixinService);
         }
-        System.out.println("获取当前用户输出内容" + wxMessage.getFromUser());
-        System.out.println(wxMessage.getToUser());
-
 
         try {
-            content = messageTest(content);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            content=service.resultMsg(content);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -85,113 +97,49 @@ public class MsgHandler extends AbstractHandler {
 
     }
 
-
-    private static String messageTest(String text) throws Exception {
-
-
-        String getKK = null;
-        try {
-            getKK = analysisJson(getKK(text));
-            System.out.println(getKK);
-            System.out.println("getKK = " + getKK);
-            if (getKK.length() <= 8) {
-                return "没查询到相关内容";
-            }
-        } catch (Exception e) {
-            HttpUtil.get("https://api.day.app/VVtPqTFKkTfBFLorEvLDX3/自助影视资源查询发生异常" + e.getMessage());
-        }
-        if (getKK.length() > 8) {
-
-            return getKK.length() < 600 ? getKK : getKK.substring(0, 300);
-        }
-
-
-        return "没查询到相关内容";
+    private void extracted(WxMpXmlMessage wxMessage, String content) {
+        String originalString = "http://139.196.92.81/res/show.html?r=" + content;
+        String encodedString = Base64.getEncoder().encodeToString(originalString.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        Map<String, Object> paramMap = new HashMap<>();
+        System.out.println("获取当前用户输出内容" + wxMessage.getFromUser());
+        System.out.println(wxMessage.getToUser());
+        paramMap.put("url", encodedString);
+        paramMap.put("app_id", lotteryProperties.getAPPID());
+        paramMap.put("app_secret", lotteryProperties.getAPPSECRET());
+        String result = HttpUtil.get("https://www.mxnzp.com/api/lottery/common/check", paramMap);
+        ResultMsg bean = JSONUtil.toBean(result, ResultMsg.class);
+        System.out.println(bean.toString());
     }
 
 
-    public static String getKK(String text) throws Exception {
-        OkHttpClient client = new OkHttpClient();
-
-        String token = getToken();
-        String encode = URLEncoder.encode(text, "UTF-8");
-
-        RequestBody formBody = new FormBody.Builder()
-                .add("name", text)
-                .add("token", token)
-                .build();
-
-        Request request = new Request.Builder()
-                .url("http://m.9dups.com/v/api/getKK")
-                .post(formBody)
-                .header("Host", "m.9dups.com")
-                .header("Accept", "*/*")
-                .header("X-Requested-With", "XMLHttpRequest")
-                .header("Accept-Language", "zh-CN,zh-Hans;q=0.9")
-                .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .header("Origin", "http://m.9dups.com")
-                .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15")
-                .header("Referer", "http://m.9dups.com/app/index.html?name=%" + encode + "&id=test&token=" + token)
-                .header("Cookie", "Hm_lpvt_0606cc863fe63b0953d06585b4897bcb=1705107327; Hm_lvt_0606cc863fe63b0953d06585b4897bcb=1704955344")
-                .header("Proxy-Connection", "keep-alive")
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-            return response.body().string();
-        }
+    @Data
+    @ToString
+    class ResultMsg {
+        private Integer code;
+        private String msg;
+        private ResultMsgData data;
     }
 
+    @Data
+    class ResultMsgData {
 
-    private static String getToken() throws IOException {
-        OkHttpClient client = new OkHttpClient();
-
-        Request request = new Request.Builder()
-                .url("http://m.9dups.com/v/api/getToken")
-                .header("Host", "m.9dups.com")
-                .header("Cookie", "Hm_lpvt_0606cc863fe63b0953d06585b4897bcb=1705107048; Hm_lvt_0606cc863fe63b0953d06585b4897bcb=1704955344")
-                .header("If-None-Match", "W/\"27-D9bnsYCdPGR0e+M4DGjmIg9CSbs\"")
-                .header("Accept", "*/*")
-                .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15")
-                .header("Referer", "http://m.9dups.com/app/index.html?name=%E7%B9%81%E8%8A%B1&id=test&token=18im4napra8")
-                .header("Accept-Language", "zh-CN,zh-Hans;q=0.9")
-                .header("X-Requested-With", "XMLHttpRequest")
-                .header("Proxy-Connection", "keep-alive")
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            return JSONUtil.parseObj(response.body().string()).getStr("token");
-        }
-
+        private String shortUrl;
+        private String url;
     }
 
-
-    public static String analysisJson(String json) {
-
-
-        if (!StrUtil.hasEmpty(json)) {
-            if (JSONUtil.isTypeJSON(json)) {
-                JsonsRootBean jsonsRootBean = JSONUtil.toBean(json, JsonsRootBean.class);
-                StringBuffer sb = new StringBuffer();
-                for (Lists lists : jsonsRootBean.getList()) {
-
-                    sb.append(lists + "\r\n");
-
-                }
-                return sb.toString();
-            }
-
-        }
-        return json;
-    }
 
     public static void main(String[] args) throws Exception {
+        String encode = URLEncoder.encode("江河日上", "UTF-8");
+        String originalString = "http://127.0.0.1/res/show?r=" + encode;
+        String encodedString = Base64.getEncoder().encodeToString(originalString.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("url", encodedString);
+        paramMap.put("app_id", "vinnsglluwk0brol");
+        paramMap.put("app_secret", "HbKwaYgoIr1DhFFZ9rFoHEHhHZB1bYUT");
+        String result = HttpUtil.get("https://www.mxnzp.com/api/shortlink/create", paramMap);
+        ResultMsg bean = JSONUtil.toBean(result, ResultMsg.class);
+        System.out.println(bean.data.shortUrl);
 
-        System.out.println(messageTest("繁花"));
+
     }
-
-
 }
