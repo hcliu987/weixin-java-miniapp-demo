@@ -16,8 +16,7 @@ public class SearchTest {
 
     @Test
     public void test() throws Exception {
-        String 江河日上 = service.resultMsg("江河日上");
-        System.out.println(江河日上.length());
-        System.out.println(江河日上);
+        String msg = service.resultMsg("福利连");
+        System.out.println("当前结果："+msg);
     }
 }

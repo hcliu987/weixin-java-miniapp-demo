@@ -92,6 +92,9 @@ public class MsgHandler extends AbstractHandler {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        if (content.length() < 1) {
+            content = "没查询到相关内容";
+        }
         logger.info("当前用户{}查询的内容:{}", fromUser, content);
         return new TextBuilder().build(content, wxMessage, weixinService);
 

@@ -1,6 +1,5 @@
 package com.hc.wx.mp.controller;
 
-import cn.hutool.http.HttpUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
@@ -17,6 +16,7 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 
+import java.util.HashMap;
 
 /**
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
@@ -73,6 +73,7 @@ public class WxPortalController {
         if (!wxService.checkSignature(timestamp, nonce, signature)) {
             throw new IllegalArgumentException("非法请求，可能属于伪造的请求！");
         }
+
         WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
         WxMpXmlOutMessage outMessage = this.route(inMessage);
         if (outMessage == null) {
@@ -94,9 +95,4 @@ public class WxPortalController {
         return null;
     }
 
-
-
-
-    public static void main(String[] args) {
-    }
 }

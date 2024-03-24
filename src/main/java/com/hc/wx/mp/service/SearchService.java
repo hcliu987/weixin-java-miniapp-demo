@@ -218,13 +218,13 @@ public class SearchService {
         return objects;
     }
 
-    public  JsonsRootBean analysisJson(String json) {
+    public JsonsRootBean analysisJson(String json) {
         JsonsRootBean jsonsRootBean = null;
 
         if (!StrUtil.hasEmpty(json)) {
             if (JSONUtil.isTypeJSON(json)) {
-                 jsonsRootBean = JSONUtil.toBean(json, JsonsRootBean.class);
-                return  jsonsRootBean;
+                jsonsRootBean = JSONUtil.toBean(json, JsonsRootBean.class);
+                return jsonsRootBean;
             }
 
         }
@@ -232,11 +232,28 @@ public class SearchService {
     }
 
     public String resultMsg(String text) throws Exception {
-        StringBuilder sb=new StringBuilder();
-        sb.append(analysisJson(search(text)).getList().get(0).getAnswer());
-        sb.append(analysisJson(getDyfx(text)).getList().get(0).getAnswer());
-        sb.append(analysisJson(getJuzi(text)).getList().get(0).getAnswer());
-        sb.append(analysisJson(getXiaoyu(text)).getList().get(0).getAnswer());
-       return sb.toString();
+        StringBuilder sb = new StringBuilder();
+        if (search(text).length() > 40) {
+            if (analysisJson(search(text)).getList() != null) {
+                System.out.println(analysisJson(search(text)).getList().size());
+                sb.append(analysisJson(search(text)).getList().get(0).getAnswer());
+            }
+        }
+        if (getDyfx(text).length() > 40) {
+            if (getDyfx(text) != null) {
+                sb.append(analysisJson(getDyfx(text)).getList().get(0).getAnswer());
+            }
+        }
+        if (getJuzi(text).length() > 40) {
+            if (getJuzi(text) != null) {
+                sb.append(analysisJson(getJuzi(text)).getList().get(0).getAnswer());
+            }
+        }
+        if (getJuzi(text).length() > 40) {
+            if (getXiaoyu(text) != null) {
+                sb.append(analysisJson(getXiaoyu(text)).getList().get(0).getAnswer());
+            }
+        }
+        return sb.toString();
     }
 }

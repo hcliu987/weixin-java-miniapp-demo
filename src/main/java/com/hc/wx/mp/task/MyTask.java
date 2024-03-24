@@ -28,7 +28,7 @@ public class MyTask {
     Task task = new Task();
 
 
-    @Scheduled(cron = "45 50 21 ? * 2,4,7")
+   // @Scheduled(cron = "45 50 21 ? * 2,4,7")
     public void run() throws InterruptedException {
         log.info("定时任务执行开始");
         List myNumbers = new ArrayList<String>();
@@ -61,7 +61,7 @@ public class MyTask {
     }
 
 
-    @Scheduled(cron = "0 5 18 ? * *")
+ //   @Scheduled(cron = "0 5 18 ? * *")
     public void appointmentResults() {
         task.appointmentResults();
 
