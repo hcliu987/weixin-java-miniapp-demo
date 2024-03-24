@@ -235,23 +235,34 @@ public class SearchService {
         StringBuilder sb = new StringBuilder();
         if (search(text).length() > 40) {
             if (analysisJson(search(text)).getList() != null) {
-                System.out.println(analysisJson(search(text)).getList().size());
-                sb.append(analysisJson(search(text)).getList().get(0).getAnswer());
+                if (analysisJson(search(text)).getList().size() > 0) {
+
+                    sb.append(analysisJson(search(text)).getList().get(0).getAnswer());
+                }
             }
         }
         if (getDyfx(text).length() > 40) {
             if (getDyfx(text) != null) {
-                sb.append(analysisJson(getDyfx(text)).getList().get(0).getAnswer());
+                if (analysisJson(getDyfx(text)).getList().size() > 0) {
+                    sb.append(analysisJson(getDyfx(text)).getList().get(0).getAnswer());
+                }
+
             }
         }
         if (getJuzi(text).length() > 40) {
             if (getJuzi(text) != null) {
-                sb.append(analysisJson(getJuzi(text)).getList().get(0).getAnswer());
+                if (analysisJson(getJuzi(text)).getList().size() > 0) {
+                    sb.append(analysisJson(getJuzi(text)).getList().get(0).getAnswer());
+                }
+
             }
         }
         if (getJuzi(text).length() > 40) {
             if (getXiaoyu(text) != null) {
-                sb.append(analysisJson(getXiaoyu(text)).getList().get(0).getAnswer());
+                if (analysisJson(getXiaoyu(text)).getList().size() > 0) {
+                    sb.append(analysisJson(getXiaoyu(text)).getList().get(0).getAnswer());
+                }
+
             }
         }
         return sb.toString();
