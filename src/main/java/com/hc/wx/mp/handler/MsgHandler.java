@@ -52,8 +52,8 @@ public class MsgHandler extends AbstractHandler {
 
     @Autowired
     private LotteryProperties lotteryProperties;
-    @Autowired
-    private RedisCache redisCache;
+//    @Autowired
+//    private RedisCache redisCache;
 
     @Autowired
     SearchService service;
@@ -68,25 +68,9 @@ public class MsgHandler extends AbstractHandler {
         }
 
         String content = wxMessage.getContent();
-        Task task = new Task();
         String fromUser = wxMessage.getFromUser();
-        if (content.length() > 20) {
 
-            // content.replace(" ",",").split("\n");
-            List<String> list = Arrays.asList(content.replace(" ", ",").replace("-", "@").split("\n"));
-            System.out.println("当前彩票" + list);
-            LUser u = new LUser();
-            u.setId(fromUser);
-            u.setMyNumbers(list);
-            u.setLast(task.lastExpect(lotteryProperties));
-            redisCache.setCacheObject("wx:" + wxMessage.getFromUser(), u);
-            return new TextBuilder().build("当期结果会在当期开彩票以后进行通知", wxMessage, weixinService);
-        }
 
-        try {
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
         try {
             content=service.resultMsg(content);
         } catch (Exception e) {
@@ -145,4 +129,19 @@ public class MsgHandler extends AbstractHandler {
 
 
     }
+
+
+    //        Task task = new Task();
+//        if (content.length() > 20) {
+//
+//            // content.replace(" ",",").split("\n");
+//            List<String> list = Arrays.asList(content.replace(" ", ",").replace("-", "@").split("\n"));
+//            System.out.println("当前彩票" + list);
+//            LUser u = new LUser();
+//            u.setId(fromUser);
+//            u.setMyNumbers(list);
+//            u.setLast(task.lastExpect(lotteryProperties));
+//            redisCache.setCacheObject("wx:" + wxMessage.getFromUser(), u);
+//            return new TextBuilder().build("当期结果会在当期开彩票以后进行通知", wxMessage, weixinService);
+//        }
 }
