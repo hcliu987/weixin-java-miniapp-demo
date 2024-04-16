@@ -6,6 +6,8 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.hc.wx.mp.entity.JsonsRootBean;
 import com.hc.wx.mp.entity.Lists;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,6 +22,7 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 @Service
+@Slf4j
 public class SearchService {
 
     public String getJuzi(String text) throws IOException {
@@ -232,6 +235,7 @@ public class SearchService {
     }
 
     public String resultMsg(String text) throws Exception {
+        long startTime =System.currentTimeMillis();
         StringBuilder sb = new StringBuilder();
         if (search(text).length() > 40) {
             if (analysisJson(search(text)).getList() != null) {
@@ -265,6 +269,9 @@ public class SearchService {
 
             }
         }
+        long endTime =System.currentTimeMillis();
+        System.out.printf("当前方法查询时间: %d 秒",(endTime - startTime)/1000);
+        log.info("当前方法查询时间: %d 秒",(endTime - startTime)/1000);
         return sb.toString();
     }
 }
