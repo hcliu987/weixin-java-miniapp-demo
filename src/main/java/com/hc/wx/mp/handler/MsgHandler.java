@@ -1,17 +1,10 @@
 package com.hc.wx.mp.handler;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.hc.wx.mp.builder.TextBuilder;
 import com.hc.wx.mp.config.LotteryProperties;
-import com.hc.wx.mp.config.RedisCache;
-import com.hc.wx.mp.entity.JsonsRootBean;
-import com.hc.wx.mp.entity.LUser;
-import com.hc.wx.mp.entity.Lists;
 import com.hc.wx.mp.service.SearchService;
-import com.hc.wx.mp.task.Task;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -19,25 +12,11 @@ import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
-import okhttp3.*;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import javax.naming.directory.SearchResult;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpResponse;
 import java.util.*;
-import java.util.zip.GZIPInputStream;
 
 import static me.chanjar.weixin.common.api.WxConsts.XmlMsgType;
 

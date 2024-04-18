@@ -2,21 +2,20 @@ package com.hc.wx.mp.task;
 
 import com.hc.wx.mp.config.LotteryProperties;
 import com.hc.wx.mp.config.NoticeProperties;
-import com.hc.wx.mp.config.RedisCache;
 import com.hc.wx.mp.entity.LUser;
-import com.hc.wx.mp.handler.MsgHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Component
 @Slf4j
+@EnableScheduling
 public class MyTask {
     @Autowired
     RedisTemplate redisTemplate;
@@ -27,8 +26,13 @@ public class MyTask {
     private LotteryProperties lotteryProperties;
     Task task = new Task();
 
+    @Scheduled(cron = " 1 1 9  * * ?")
+    public void runSf() {
 
-   // @Scheduled(cron = "45 50 21 ? * 2,4,7")
+        task.sfExrpNotity(redisTemplate,properties);
+    }
+
+   // @Scheduled(cron = " 30 * *  * * ?")
     public void run() throws InterruptedException {
         log.info("定时任务执行开始");
         List myNumbers = new ArrayList<String>();
@@ -40,19 +44,19 @@ public class MyTask {
         String expect = task.lastExpect(lotteryProperties);
         Set keys = redisTemplate.keys("wx:*");
         System.out.println(keys);
-        if (keys.size()> 0) {
+        if (keys.size() > 0) {
 
             keys.stream().forEach(
                     s -> {
 
                         String key = s.toString();
-                        LUser  user = (LUser) redisTemplate.opsForValue().get(key);
+                        LUser user = (LUser) redisTemplate.opsForValue().get(key);
 //                        user.setMyNumbers( user.getMyNumbers().stream().map(
 //                                myNumber ->
 //                                        myNumber.replace("-", "@")
 //
 //                        ).collect(Collectors.toList()));
-                        task.check(user, lotteryProperties, properties);
+                       // task.check(user, lotteryProperties, properties);
                     }
             );
 
@@ -61,13 +65,5 @@ public class MyTask {
     }
 
 
- //   @Scheduled(cron = "0 5 18 ? * *")
-    public void appointmentResults() {
-        task.appointmentResults();
 
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-
-    }
 }

@@ -1,21 +1,17 @@
 package com.hc.wx.mp.service;
 
 
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.hc.wx.mp.entity.JsonsRootBean;
-import com.hc.wx.mp.entity.Lists;
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
@@ -235,7 +231,9 @@ public class SearchService {
     }
 
     public String resultMsg(String text) throws Exception {
-        long startTime =System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         StringBuilder sb = new StringBuilder();
         if (search(text).length() > 40) {
             if (analysisJson(search(text)).getList() != null) {
@@ -269,9 +267,11 @@ public class SearchService {
 
             }
         }
-        long endTime =System.currentTimeMillis();
-        System.out.printf("当前方法查询时间: %d 秒",(endTime - startTime)/1000);
-        log.info("当前方法查询时间: %d 秒",(endTime - startTime)/1000);
+        long endTime = System.currentTimeMillis();
+        stopWatch.stop();
+        System.out.printf("当前方法查询时间: %d 秒. %n", (endTime - startTime) / 1000);
+        System.out.printf("当前方法执行时长: %s 秒. %n", stopWatch.getTotalTimeSeconds()+"");
+        log.info("当前方法查询时间: %d 秒", (endTime - startTime) / 1000);
         return sb.toString();
     }
 }
