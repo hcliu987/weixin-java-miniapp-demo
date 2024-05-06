@@ -15,6 +15,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.GZIPInputStream;
 
 @Service
@@ -231,47 +235,84 @@ public class SearchService {
     }
 
     public String resultMsg(String text) throws Exception {
+        StringBuilder sb = new StringBuilder();
         long startTime = System.currentTimeMillis();
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        StringBuilder sb = new StringBuilder();
-        if (search(text).length() > 40) {
-            if (analysisJson(search(text)).getList() != null) {
-                if (analysisJson(search(text)).getList().size() > 0) {
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
 
-                    sb.append(analysisJson(search(text)).getList().get(0).getAnswer());
-                }
-            }
-        }
-        if (getDyfx(text).length() > 40) {
-            if (getDyfx(text) != null) {
-                if (analysisJson(getDyfx(text)).getList().size() > 0) {
-                    sb.append(analysisJson(getDyfx(text)).getList().get(0).getAnswer());
-                }
+        CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+            try {
+                if (search(text).length() > 40) {
+                    if (analysisJson(search(text)).getList() != null) {
+                        if (analysisJson(search(text)).getList().size() > 0) {
 
-            }
-        }
-        if (getJuzi(text).length() > 40) {
-            if (getJuzi(text) != null) {
-                if (analysisJson(getJuzi(text)).getList().size() > 0) {
-                    sb.append(analysisJson(getJuzi(text)).getList().get(0).getAnswer());
+                            sb.append(analysisJson(search(text)).getList().get(0).getAnswer());
+                        }
+                    }
                 }
-
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        }
-        if (getJuzi(text).length() > 40) {
-            if (getXiaoyu(text) != null) {
-                if (analysisJson(getXiaoyu(text)).getList().size() > 0) {
-                    sb.append(analysisJson(getXiaoyu(text)).getList().get(0).getAnswer());
+            return sb.toString();
+        },executorService);
+        CompletableFuture<String> stringCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                if (getDyfx(text).length() > 40) {
+                    if (getDyfx(text) != null) {
+                        if (analysisJson(getDyfx(text)).getList().size() > 0) {
+                            sb.append(analysisJson(getDyfx(text)).getList().get(0).getAnswer());
+                        }
+
+                    }
                 }
-
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        }
+            return sb.toString();
+        },executorService);
+        CompletableFuture<String> stringCompletableFuture1 = CompletableFuture.supplyAsync(() -> {
+
+            try {
+                if (getJuzi(text).length() > 40) {
+                    if (getJuzi(text) != null) {
+                        if (analysisJson(getJuzi(text)).getList().size() > 0) {
+                            sb.append(analysisJson(getJuzi(text)).getList().get(0).getAnswer());
+                        }
+
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return sb.toString();
+        },executorService);
+
+        CompletableFuture<String> stringCompletableFuture2 = CompletableFuture.supplyAsync(() -> {
+            try {
+                if (getJuzi(text).length() > 40) {
+                    if (getXiaoyu(text) != null) {
+                        if (analysisJson(getXiaoyu(text)).getList().size() > 0) {
+                            sb.append(analysisJson(getXiaoyu(text)).getList().get(0).getAnswer());
+                        }
+
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return sb.toString();
+        },executorService);
+
+        CompletableFuture<Object> allOf = CompletableFuture.anyOf(future, stringCompletableFuture, stringCompletableFuture1,stringCompletableFuture2);
+        System.out.println(allOf.get());
+
+
         long endTime = System.currentTimeMillis();
         stopWatch.stop();
         System.out.printf("当前方法查询时间: %d 秒. %n", (endTime - startTime) / 1000);
-        System.out.printf("当前方法执行时长: %s 秒. %n", stopWatch.getTotalTimeSeconds()+"");
+        System.out.printf("当前方法执行时长: %s 秒. %n", stopWatch.getTotalTimeSeconds() + "");
         log.info("当前方法查询时间: %d 秒", (endTime - startTime) / 1000);
-        return sb.toString();
+        return (String) allOf.get();
     }
 }
