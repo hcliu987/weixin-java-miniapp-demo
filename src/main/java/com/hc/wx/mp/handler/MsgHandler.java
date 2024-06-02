@@ -51,7 +51,7 @@ public class MsgHandler extends AbstractHandler {
 
 
         try {
-            content=service.resultMsg(content);
+            content = service.resultMsg(content);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -105,7 +105,14 @@ public class MsgHandler extends AbstractHandler {
         String result = HttpUtil.get("https://www.mxnzp.com/api/shortlink/create", paramMap);
         ResultMsg bean = JSONUtil.toBean(result, ResultMsg.class);
         System.out.println(bean.data.shortUrl);
-
+        {
+            {
+                {
+                    {
+                    }
+                }
+            }
+        }
 
     }
 

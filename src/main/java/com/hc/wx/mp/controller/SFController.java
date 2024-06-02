@@ -22,4 +22,9 @@ public class SFController {
     public void addUser(@RequestBody SFUser user) {
         redisTemplate.opsForValue().set("sf:" + user.getPhone(), user);
     }
+
+    @PostMapping("up")
+    public void up(@RequestBody String auth) {
+        redisTemplate.opsForValue().set("auth",auth);
+    }
 }

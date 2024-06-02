@@ -1,5 +1,6 @@
 package com.hc.wx.mp.task;
 
+import cn.hutool.core.io.file.FileReader;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
 import com.hc.wx.mp.config.LotteryProperties;
@@ -117,6 +118,17 @@ public class Task {
 
     }
 
+    public String getSFurl(){
+        FileReader fileReader = new FileReader("/Users/liuhaicheng/Desktop/1.txt");
+        String result = fileReader.readString();
+        System.out.println(result);
+        return ";";
+    }
+
+    public void sfCheck(RedisTemplate redisTemplate, NoticeProperties properties,int number) {
+        String s = redisTemplate.opsForValue().get("sf", 0, number-1);
+        System.out.println(s);
+    }
 
     @Data
     @ToString

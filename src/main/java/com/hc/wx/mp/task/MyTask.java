@@ -1,5 +1,9 @@
 package com.hc.wx.mp.task;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.cron.CronUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.hc.wx.mp.config.LotteryProperties;
 import com.hc.wx.mp.config.NoticeProperties;
 import com.hc.wx.mp.entity.LUser;
@@ -8,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -19,20 +24,21 @@ import java.util.*;
 public class MyTask {
     @Autowired
     RedisTemplate redisTemplate;
-
     @Autowired
     private NoticeProperties properties;
     @Autowired
     private LotteryProperties lotteryProperties;
+
+
     Task task = new Task();
 
     @Scheduled(cron = " 1 1 9  * * ?")
     public void runSf() {
 
-        task.sfExrpNotity(redisTemplate,properties);
+        task.sfExrpNotity(redisTemplate, properties);
     }
 
-   // @Scheduled(cron = " 30 * *  * * ?")
+    // @Scheduled(cron = " 30 * *  * * ?")
     public void run() throws InterruptedException {
         log.info("定时任务执行开始");
         List myNumbers = new ArrayList<String>();
@@ -56,14 +62,13 @@ public class MyTask {
 //                                        myNumber.replace("-", "@")
 //
 //                        ).collect(Collectors.toList()));
-                       // task.check(user, lotteryProperties, properties);
+                        // task.check(user, lotteryProperties, properties);
                     }
             );
 
         }
         task.check(myNumbers, expect, lotteryProperties, properties);
     }
-
 
 
 }
