@@ -5,10 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/sf/user")
@@ -24,7 +21,8 @@ public class SFController {
     }
 
     @PostMapping("up")
-    public void up(@RequestBody String auth) {
-        redisTemplate.opsForValue().set("auth",auth);
+    @ApiOperation(value = "青龙用户token更新")
+    public void up(@RequestParam("auth") String auth) {
+        redisTemplate.opsForValue().set("auth", auth);
     }
 }

@@ -1,5 +1,6 @@
 package com.hc.wx.mp.task;
 
+import cn.hutool.core.date.StopWatch;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import okhttp3.OkHttpClient;
@@ -27,32 +28,39 @@ public class SFTask implements Job {
     private static final String REDIS_LIST_KEY = "sf"; // 替换为你的Redis列表键
     private static final int BATCH_SIZE = 5;
     private static int offset = 0;
-    private int count = 0;
+    private static int count = 0;
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        String auth= (String) redisTemplate.opsForValue().get("auth");
+
+        StopWatch stopWatch = new StopWatch();
+        String auth = (String) redisTemplate.opsForValue().get("auth");
         System.out.println("任务执行开始");
-        Long listSize = redisTemplate.opsForList().size("Sf");
+        stopWatch.start();
+        Long listSize = redisTemplate.opsForList().size("sf");
         List<String> items = redisTemplate.opsForList().range(REDIS_LIST_KEY, offset, offset + BATCH_SIZE - 1);
         if (items == null || items.isEmpty()) {
             System.out.println("当前集合为空");
             offset = 0;
             return;
         }
-        processItems(items,auth);
+        processItems(items, auth);
         offset += BATCH_SIZE;
-        count += 5;
-        System.out.println("当前队列" + offset);
+        count = count + 2;
+        System.out.println("当前查询记录" + count);
         if (count == listSize) {
             try {
                 offset = 0;
+                count = 0;
                 System.out.println("当前任务结束");
                 jobExecutionContext.getScheduler().shutdown();
             } catch (SchedulerException e) {
                 throw new RuntimeException(e);
             }
         }
+        stopWatch.stop();
+        System.out.println("当前任务执行时间:"+stopWatch.getTotalTimeSeconds());
+
     }
 
     private void processItems(List<String> items, String auth) {
@@ -67,7 +75,7 @@ public class SFTask implements Job {
         });
 
         jsonObject.put("value", stringBuffer.toString());
-        requestBody= jsonObject.toString();
+        requestBody = jsonObject.toString();
         System.out.println(jsonObject);
         OkHttpClient client = new OkHttpClient();
 
