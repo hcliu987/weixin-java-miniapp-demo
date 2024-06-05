@@ -1,7 +1,6 @@
 package com.hc.wx.mp.task;
 
 import cn.hutool.core.io.file.FileReader;
-import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import me.chanjar.weixin.common.error.WxErrorException;

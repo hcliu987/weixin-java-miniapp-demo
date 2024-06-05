@@ -3,6 +3,7 @@ package com.hc.wx.mp.task;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -17,7 +18,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 public class SFTask implements Job {
 
@@ -34,11 +37,12 @@ public class SFTask implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
         StopWatch stopWatch = new StopWatch();
-        String auth = (String) redisTemplate.opsForValue().get("auth");
-        System.out.println("任务执行开始");
+        log.info("任务执行开始");
         stopWatch.start();
+        String auth = (String) redisTemplate.opsForValue().get("auth");
         Long listSize = redisTemplate.opsForList().size("sf");
-        List<String> items = redisTemplate.opsForList().range(REDIS_LIST_KEY, offset, offset + BATCH_SIZE - 1);
+        List<String> items = redisTemplate.opsForList().range(REDIS_LIST_KEY, offset, Math.min(offset + BATCH_SIZE - 1, listSize));
+
         if (items == null || items.isEmpty()) {
             System.out.println("当前集合为空");
             offset = 0;
@@ -46,20 +50,22 @@ public class SFTask implements Job {
         }
         processItems(items, auth);
         offset += BATCH_SIZE;
-        count = count + 2;
-        System.out.println("当前查询记录" + count);
+        count = count + BATCH_SIZE;
+        log.info("当前查询记录: {}", count);
+
         if (count == listSize) {
             try {
                 offset = 0;
                 count = 0;
-                System.out.println("当前任务结束");
+                log.info("当前任务结束");
                 jobExecutionContext.getScheduler().shutdown();
             } catch (SchedulerException e) {
-                throw new RuntimeException(e);
+                log.error("调度器关闭时发生异常: {}", e.getMessage(), e);
+                throw new RuntimeException("调度器关闭失败: " + e.getMessage(), e);
             }
         }
         stopWatch.stop();
-        System.out.println("当前任务执行时间:"+stopWatch.getTotalTimeSeconds());
+        log.info("当前任务执行时间: {}", stopWatch.getTotalTimeSeconds());
 
     }
 
@@ -69,15 +75,17 @@ public class SFTask implements Job {
         String requestBody = "{\"name\":\"sfsyUrl\",\"value\":\"884024720\",\"remarks\":null,\"id\":1}";
         JSONObject jsonObject = JSONUtil.parseObj(requestBody);
         // 处理从Redis列表中读取的项目
-        items.forEach(item -> {
-            stringBuffer.append(item);
-            stringBuffer.append("\n");
-        });
+        items.forEach(item -> stringBuffer.append(item).append("\n"));
 
         jsonObject.put("value", stringBuffer.toString());
         requestBody = jsonObject.toString();
         System.out.println(jsonObject);
-        OkHttpClient client = new OkHttpClient();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .build();
 
         Request request = new Request.Builder()
                 .url("http://139.196.92.81:5700/api/envs?t=1717033389419")
