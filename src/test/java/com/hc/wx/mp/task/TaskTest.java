@@ -1,6 +1,5 @@
 package com.hc.wx.mp.task;
 
-import cn.hutool.core.io.file.FileReader;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 

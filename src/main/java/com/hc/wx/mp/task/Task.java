@@ -29,9 +29,9 @@ public class Task {
 
     public void sfExrpNotity(RedisTemplate redisTemplate, NoticeProperties properties) {
         LocalDate now = LocalDate.now();
-        Set keys = redisTemplate.keys("sf:*");
+        Set<String> keys = redisTemplate.keys("sf:*");
         List<SFUser> sfUsers = new ArrayList<>();
-        if (keys.size() > 0) {
+        if (keys.isEmpty()) {
             keys.stream().forEach(v -> {
                 sfUsers.add((SFUser) redisTemplate.opsForValue().get(v.toString()));
             });
