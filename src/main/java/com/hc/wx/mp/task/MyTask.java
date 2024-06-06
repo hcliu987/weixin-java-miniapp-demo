@@ -2,7 +2,6 @@ package com.hc.wx.mp.task;
 
 import com.hc.wx.mp.config.LotteryProperties;
 import com.hc.wx.mp.config.NoticeProperties;
-import com.hc.wx.mp.entity.LUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
