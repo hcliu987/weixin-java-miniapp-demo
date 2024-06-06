@@ -41,22 +41,21 @@ public class SFTask implements Job {
         stopWatch.start();
         String auth = (String) redisTemplate.opsForValue().get("auth");
         Long listSize = redisTemplate.opsForList().size("sf");
+        log.info("当前拥有账号"+listSize);
         List<String> items = redisTemplate.opsForList().range(REDIS_LIST_KEY, offset, Math.min(offset + BATCH_SIZE - 1, listSize));
 
         if (items == null || items.isEmpty()) {
-            System.out.println("当前集合为空");
+            log.info("当前集合为空");
             offset = 0;
             return;
         }
         processItems(items, auth);
         offset += BATCH_SIZE;
-        count = count + BATCH_SIZE;
-        log.info("当前查询记录: {}", count);
+        log.info("当前查询记录: {}", offset);
 
-        if (count == listSize) {
+        if (offset>=listSize) {
             try {
                 offset = 0;
-                count = 0;
                 log.info("当前任务结束");
                 jobExecutionContext.getScheduler().shutdown();
             } catch (SchedulerException e) {
@@ -79,34 +78,34 @@ public class SFTask implements Job {
 
         jsonObject.put("value", stringBuffer.toString());
         requestBody = jsonObject.toString();
-        System.out.println(jsonObject);
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
                 .build();
+        log.info("当前url"+requestBody);
 
-        Request request = new Request.Builder()
-                .url("http://139.196.92.81:5700/api/envs?t=1717033389419")
-                .put(RequestBody.create(requestBody.getBytes()))
-                .header("Host", "139.196.92.81:5700")
-                .header("Accept", "application/json, text/plain, */*")
-                .header("Authorization", auth)
-                .header("Accept-Language", "zh-CN,zh-Hans;q=0.9")
-                .header("Content-Type", "application/json")
-                .header("Origin", "http://139.196.92.81:5700")
-                .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15")
-                .header("Referer", "http://139.196.92.81:5700/env")
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-            response.body().string();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        Request request = new Request.Builder()
+//                .url("http://139.196.92.81:5700/api/envs?t=1717033389419")
+//                .put(RequestBody.create(requestBody.getBytes()))
+//                .header("Host", "139.196.92.81:5700")
+//                .header("Accept", "application/json, text/plain, */*")
+//                .header("Authorization", auth)
+//                .header("Accept-Language", "zh-CN,zh-Hans;q=0.9")
+//                .header("Content-Type", "application/json")
+//                .header("Origin", "http://139.196.92.81:5700")
+//                .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15")
+//                .header("Referer", "http://139.196.92.81:5700/env")
+//                .build();
+//
+//        try (Response response = client.newCall(request).execute()) {
+//            if (!response.isSuccessful()) {
+//                throw new IOException("Unexpected code " + response);
+//            }
+//            response.body().string();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }

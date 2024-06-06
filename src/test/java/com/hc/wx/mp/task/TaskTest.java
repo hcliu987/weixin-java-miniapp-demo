@@ -28,9 +28,9 @@ class TaskTest {
 
     @Test
     void appointmentResults() throws InterruptedException, WxErrorException {
-        FileReader fileReader = FileReader.create(new File("/Users/liuhaicheng/Desktop/1.txt"));
-        String[] split = fileReader.readString().split("\n");
-       redisTemplate.opsForList().rightPushAll("sf",split);
+      //  FileReader fileReader = FileReader.create(new File("/Users/liuhaicheng/Desktop/1.txt"));
+        //String[] split = fileReader.readString().split("\n");
+      // redisTemplate.opsForList().rightPushAll("sf",split);
 
     }
 
@@ -41,8 +41,8 @@ class TaskTest {
 //        jsonObject.put("value","2");
 //
 //        System.out.println(jsonObject.toString());
-       String auth ="Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiLWY5M0xtZ0M3X0RfcTFCLXZKNmNaMDM2MXFNd3YwazdPcU9JMWo2SmhPdlpzX2gzeloiLCJpYXQiOjE3MTcwNTU1NTksImV4cCI6MTcxODc4MzU1OX0.wIjJu9j2ilYGcFj8sSFrCCeCApli6-tI5vpzTXQkK53eWKoA256Bi0iJWKlrAq1t";
-       redisTemplate.opsForValue().set("auth",auth);
+     //  String auth ="Bearer eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiLWY5M0xtZ0M3X0RfcTFCLXZKNmNaMDM2MXFNd3YwazdPcU9JMWo2SmhPdlpzX2gzeloiLCJpYXQiOjE3MTcwNTU1NTksImV4cCI6MTcxODc4MzU1OX0.wIjJu9j2ilYGcFj8sSFrCCeCApli6-tI5vpzTXQkK53eWKoA256Bi0iJWKlrAq1t";
+      // redisTemplate.opsForValue().set("auth",auth);
     }
 
     private void processSubList(List<String> results) {

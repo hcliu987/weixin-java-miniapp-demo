@@ -33,7 +33,7 @@ public class MyTask {
         task.sfExrpNotity(redisTemplate, properties);
     }
 
-     @Scheduled(cron = " 45 53 21 ? * 2,4,7")
+    @Scheduled(cron = " 45 53 21 ? * 2,4,7")
     public void run() throws InterruptedException {
         log.info("定时任务执行开始");
         List myNumbers = new ArrayList<String>();
@@ -43,27 +43,30 @@ public class MyTask {
         myNumbers.add("3,4,18,20,22,30@7");
         myNumbers.add("4,14,18,24,27,29@011");
         String expect = task.lastExpect(lotteryProperties);
-//        Set keys = redisTemplate.keys("wx:*");
-//        System.out.println(keys);
-//        if (keys.size() > 0) {
-//
-//            keys.stream().forEach(
-//                    s -> {
-//
-//                        String key = s.toString();
-//                        LUser user = (LUser) redisTemplate.opsForValue().get(key);
-////                        user.setMyNumbers( user.getMyNumbers().stream().map(
-////                                myNumber ->
-////                                        myNumber.replace("-", "@")
-////
-////                        ).collect(Collectors.toList()));
-//                        // task.check(user, lotteryProperties, properties);
-//                    }
-//            );
 
-//        }
         task.check(myNumbers, expect, lotteryProperties, properties);
+
     }
 
+
+    /**       Set keys = redisTemplate.keys("wx:*");
+     //        System.out.println(keys);
+     //        if (keys.size() > 0) {
+     //
+     //            keys.stream().forEach(
+     //                    s -> {
+     //
+     //                        String key = s.toString();
+     //                        LUser user = (LUser) redisTemplate.opsForValue().get(key);
+     ////                        user.setMyNumbers( user.getMyNumbers().stream().map(
+     ////                                myNumber ->
+     ////                                        myNumber.replace("-", "@")
+     ////
+     ////                        ).collect(Collectors.toList()));
+     //                        // task.check(user, lotteryProperties, properties);
+     //                    }
+     //            );
+
+     }      **/
 
 }
