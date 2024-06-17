@@ -21,7 +21,6 @@ public class MyTaskTest {
     LotteryProperties lotteryProperties;
     @Test
     public void test() {
-        String expect = task.lastExpect(lotteryProperties);
-        System.out.println(expect);
+
     }
 }

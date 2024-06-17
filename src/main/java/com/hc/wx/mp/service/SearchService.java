@@ -26,7 +26,7 @@ public class SearchService {
 
     private static final String BASE_URL = "http://m.kkqws.com/v/api/";
     private static final int STRING_LENGTH_THRESHOLD = 40; // 避免硬编码
-    private ExecutorService executorService = Executors.newFixedThreadPool(5); //
+    private ExecutorService executorService = Executors.newFixedThreadPool(10); //
 
     public SearchService() {
     }
@@ -47,8 +47,7 @@ public class SearchService {
         }
 
         // 处理响应
-        try (InputStream responseStream = getResponseStream(httpConn);
-             Scanner s = new Scanner(responseStream).useDelimiter("\\A")) {
+        try (InputStream responseStream = getResponseStream(httpConn); Scanner s = new Scanner(responseStream).useDelimiter("\\A")) {
             return s.hasNext() ? s.next() : "";
         }
     }
@@ -78,30 +77,32 @@ public class SearchService {
         }
     }
 
-    public String search(String text) throws IOException {
+    public String search(String text) {
         String query = "name=%" + text + "&token=i69";
-        return sendRequest("search", query);
+        try {
+            return sendRequest("search", query);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    // 其他方法类似地调用sendRequest方法，减少代码重复
-    public String getDyfx(String text) throws IOException {
-        String query = "name=%" + text + "&token=i69";
-        return sendRequest("getDyfx", query);
-    }
-
-    public String getJuzi(String text) throws IOException {
+    public String getJuzi(String text) {
         String query = "name=%" + text + "%&token=i69";
-        return sendRequest("getJuzi", query);
+        try {
+            return sendRequest("getJuzi", query);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public String getJuzi2(String text) throws IOException {
-        String query = "name=%" + text + "&token=i69";
-        return sendRequest("getJuzi", query); // 注意：这里原方法是getJuzi2，但实际请求的URL是getJuzi，需要确认是否正确
-    }
 
-    public String getXiaoyu(String text) throws IOException {
+    public String getXiaoyu(String text) {
         String query = "name=%" + text + "&token=i69";
-        return sendRequest("getXiaoyu", query);
+        try {
+            return sendRequest("getXiaoyu", query);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -109,9 +110,8 @@ public class SearchService {
         ArrayList<JsonsRootBean> objects = new ArrayList<>();
         try {
             String encode = URLEncoder.encode(text, "UTF-8");
-            List<String> tasks = Arrays.asList(search(text), getDyfx(text), getJuzi(text), getXiaoyu(text), getJuzi2(text));
-            List<Future<JsonsRootBean>> futures = tasks.stream().map(task -> executorService.submit(() -> analysisJson(task)))
-                    .collect(Collectors.toList());
+            List<String> tasks = Arrays.asList(search(text), getJuzi(text), getXiaoyu(text), getJuzi(text));
+            List<Future<JsonsRootBean>> futures = tasks.stream().map(task -> executorService.submit(() -> analysisJson(task))).collect(Collectors.toList());
             for (Future<JsonsRootBean> future : futures) {
                 try {
                     JsonsRootBean jsonsRootBean = future.get(5, TimeUnit.SECONDS);
@@ -144,41 +144,102 @@ public class SearchService {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         StringBuilder sb = new StringBuilder();
-        List<Future<String>> futures;
+        //   List<Future<String>> futures;
+//        List<Callable<String>> tasks = Arrays.asList(
+//                () -> processText(text, search(text)),
+//                () -> processText(text, getJuzi(text)),
+//                () -> processText(text, getXiaoyu(text))
+//        );
+//        try {
+//            futures = executorService.invokeAll(tasks, 5, TimeUnit.SECONDS);
+//            for (Future<String> future : futures) {
+//                try {
+//                    sb.append(future.get());
+//                } catch (Exception e) {
+//                    log.error("处理任务时发生异常", e);
+//                }
+//            }
+//        } catch (InterruptedException e) {
+//            log.error("处理任务时被中断", e);
+//        } finally {
+//            executorService.shutdown();
+//        }
 
-        List<Callable<String>> tasks = Arrays.asList(
-                () -> processText(text, search(text)),
-                () -> processText(text, getDyfx(text)),
-                () -> processText(text, getJuzi(text)),
-                () -> processText(text, getXiaoyu(text))
-        );
-        try {
-            futures = executorService.invokeAll(tasks, 5, TimeUnit.SECONDS);
-            for (Future<String> future : futures) {
-                try {
-                    sb.append(future.get());
-                } catch (Exception e) {
-                    log.error("处理任务时发生异常", e);
-                }
+
+        List<CompletableFuture<String>> futures = Arrays.asList(
+                CompletableFuture.supplyAsync(() -> processText(search(text))),
+                CompletableFuture.supplyAsync(() -> processText(getJuzi(text))),
+                CompletableFuture.supplyAsync(() -> processText(getXiaoyu(text))));
+
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        allOf.join();
+        futures.forEach(future -> {
+            try {
+                sb.append(future.get());
+            } catch (Exception e) {
+                log.error("处理任务时发生异常", e);
             }
-        } catch (InterruptedException e) {
-            log.error("处理任务时被中断", e);
-        }
+        });
+
+
+        //等待所有任务完成
         long endTime = System.currentTimeMillis();
         stopWatch.stop();
-        System.out.printf("当前方法查询时间: %d 秒. %n", (endTime - startTime) / 1000);
         System.out.printf("当前方法执行时长: %s 秒. %n", stopWatch.getTotalTimeSeconds() + "");
         log.info("当前方法查询时间: %d 秒", (endTime - startTime) / 1000);
         return sb.toString();
     }
 
-    private String processText(String text, String source) {
+    public String processText(String source) {
+        StringBuffer sb = new StringBuffer();
         if (source != null && source.length() > STRING_LENGTH_THRESHOLD) {
             JsonsRootBean bean = analysisJson(source);
-            if (bean!=null && bean.getList()!=null && !bean.getList().isEmpty()){
-                return  bean.getList().get(0).getAnswer();
+            if (bean != null && bean.getList() != null && !bean.getList().isEmpty()) {
+
+                bean.getList().stream().forEach(list -> {
+                     sb.append(list.getAnswer()).append("\n");
+                });
             }
         }
-        return "";
+        return sb.toString();
     }
+
+
+    /**
+     * 获取任意结果
+     */
+    public String resultMsgAny(String text) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        log.info("获取任务结果开始");
+        String result = "";
+//        List<Callable<String>> tasks = Arrays.asList(
+//                () -> processText(text, search(text)),
+//                () -> processText(text, getJuzi(text)),
+//                () -> processText(text, getXiaoyu(text))
+//        );
+//        try {
+//            result = executorService.invokeAny(tasks, 5, TimeUnit.SECONDS);
+//        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+//            log.error("An error occurred while executing tasks: " + e.getMessage());
+//            return "Error occurred: " + e.getMessage();
+//        } finally {
+//            executorService.shutdown();
+//        }
+        List<CompletableFuture<String>> futures = Arrays.asList(
+                CompletableFuture.supplyAsync(() -> processText(search(text))),
+                CompletableFuture.supplyAsync(() -> processText(getJuzi(text))),
+                CompletableFuture.supplyAsync(() -> processText(getXiaoyu(text))));
+
+
+        result = futures.stream().map(CompletableFuture::join).filter(Objects::nonNull).findFirst().orElse("No result found");
+
+
+        stopWatch.stop();
+        log.info("获取任务结果结束，耗时：{}", stopWatch.getTotalTimeSeconds() + "秒");
+
+        return result;
+    }
+
+
 }

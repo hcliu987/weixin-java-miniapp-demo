@@ -36,11 +36,11 @@ public class MyTask {
     public void run() throws InterruptedException {
         log.info("定时任务执行开始");
         List myNumbers = new ArrayList<String>();
-        myNumbers.add("2,13,17,18,21,26@13");
-        myNumbers.add("2,3,9,14,20,26@9");
-        myNumbers.add("2,13,16,25,28,33@8");
-        myNumbers.add("3,4,18,20,22,30@7");
-        myNumbers.add("4,14,18,24,27,29@011");
+        myNumbers.add("5,7,12,13,17,30@13");
+        myNumbers.add("6,9,12,21,25,26@6");
+        myNumbers.add("2,7,13,17,26,33@1");
+        myNumbers.add("1,7,10,23,31,32@16");
+        myNumbers.add("19,23,24,28,29,32@014");
         String expect = task.lastExpect(lotteryProperties);
 
         task.check(myNumbers, expect, lotteryProperties, properties);
