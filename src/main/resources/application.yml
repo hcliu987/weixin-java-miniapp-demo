@@ -19,9 +19,9 @@ lottery:
 
 spring:
   redis:
-    host: 139.196.92.81
-    port: 6380
-    password: 271886
+    host: 47f93df2c7bb.c.methodot.com
+    port: 30279
+
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
