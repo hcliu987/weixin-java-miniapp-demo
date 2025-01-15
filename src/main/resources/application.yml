@@ -18,9 +18,15 @@ lottery:
   APPSECRET: HbKwaYgoIr1DhFFZ9rFoHEHhHZB1bYUT
 
 spring:
+  thymeleaf:
+    encoding: utf-8
+
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/output/
   redis:
-    host: 47f93df2c7bb.c.methodot.com
-    port: 30279
+    host: 6cbb1cbaf9a8.c.methodot.com
+    port: 30667
 
   mvc:
     pathmatch:

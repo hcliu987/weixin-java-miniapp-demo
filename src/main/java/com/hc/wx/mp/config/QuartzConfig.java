@@ -18,13 +18,13 @@ public class QuartzConfig {
     @Bean
     public Trigger sfJobTrigger() {
         SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
-                .withIntervalInHours(1) // 每小时执行一次
-                //.withIntervalInMinutes(1)
+                .withIntervalInHours(10) // 每小时执行一次
+                //.withIntervalInMinutes(2)
                 //.withIntervalInSeconds(30)
                 .repeatForever();
 
         return TriggerBuilder.newTrigger()
-                .startAt(DateBuilder.todayAt(0, 5, 0))
+                .startAt(DateBuilder.todayAt(14, 31, 0))
                 //  .endAt(DateBuilder.todayAt(9,0,0))
                 .forJob(sfJobDetail())
                 .withIdentity("redisListReaderTrigger")

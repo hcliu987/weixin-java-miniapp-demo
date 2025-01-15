@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<head>
+    <title>查询结果</title>
+</head>
+<body>
+<h1>查询结果</h1>
+<ul>
+    <th:block th:each="item : ${data}">
+        <li th:text="${item.name} + ': ' + ${item.value}"></li>
+    </th:block>
+</ul>
+</body>
+</html>

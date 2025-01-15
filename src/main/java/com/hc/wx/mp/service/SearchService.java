@@ -152,23 +152,30 @@ public class SearchService {
                 () -> processText(text, getJuzi(text)),
                 () -> processText(text, getXiaoyu(text))
         );
+
         try {
-            futures = executorService.invokeAll(tasks, 5, TimeUnit.SECONDS);
+             futures = executorService.invokeAll(tasks, 5, TimeUnit.SECONDS);
             for (Future<String> future : futures) {
                 try {
-                    sb.append(future.get());
-                } catch (Exception e) {
-                    log.error("处理任务时发生异常", e);
+                    String result = future.get();
+                    if (result != null && !result.isEmpty()) {
+                        sb.append(result);
+                        break; // 获取到任意一个结果后退出循环
+                    }
+                } catch (ExecutionException e) {
+                    log.error("任务执行失败", e);
                 }
             }
         } catch (InterruptedException e) {
-            log.error("处理任务时被中断", e);
+            log.error("任务被中断", e);
+            Thread.currentThread().interrupt();
         }
         long endTime = System.currentTimeMillis();
         stopWatch.stop();
         System.out.printf("当前方法查询时间: %d 秒. %n", (endTime - startTime) / 1000);
         System.out.printf("当前方法执行时长: %s 秒. %n", stopWatch.getTotalTimeSeconds() + "");
         log.info("当前方法查询时间: %d 秒", (endTime - startTime) / 1000);
+
         return sb.toString();
     }
 
@@ -181,4 +188,5 @@ public class SearchService {
         }
         return "";
     }
+
 }

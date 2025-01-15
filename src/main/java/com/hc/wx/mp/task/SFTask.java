@@ -5,6 +5,9 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -64,17 +68,17 @@ public class SFTask implements Job {
 
     }
 
-    private void processItems(List<String> items, String auth) {
+    public void processItems(List<String> items, String auth) {
 
         StringBuffer stringBuffer = new StringBuffer();
         String requestBody = "{\"name\":\"sfsyUrl\",\"value\":\"884024720\",\"remarks\":null,\"id\":1}";
         JSONObject jsonObject = JSONUtil.parseObj(requestBody);
-        // 处理从Redis列表中读取的项目
+//         处理从Redis列表中读取的项目
         items.forEach(item -> stringBuffer.append(item).append("\n"));
 
         jsonObject.put("value", stringBuffer.toString());
         requestBody = jsonObject.toString();
-
+        System.out.println("当前请求参数:"+requestBody);
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
@@ -82,26 +86,28 @@ public class SFTask implements Job {
                 .build();
         log.info("当前url"+requestBody);
 
-//        Request request = new Request.Builder()
-//                .url("http://139.196.92.81:5700/api/envs?t=1717033389419")
-//                .put(RequestBody.create(requestBody.getBytes()))
-//                .header("Host", "139.196.92.81:5700")
-//                .header("Accept", "application/json, text/plain, */*")
-//                .header("Authorization", auth)
-//                .header("Accept-Language", "zh-CN,zh-Hans;q=0.9")
-//                .header("Content-Type", "application/json")
-//                .header("Origin", "http://139.196.92.81:5700")
-//                .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15")
-//                .header("Referer", "http://139.196.92.81:5700/env")
-//                .build();
-//
-//        try (Response response = client.newCall(request).execute()) {
-//            if (!response.isSuccessful()) {
-//                throw new IOException("Unexpected code " + response);
-//            }
-//            response.body().string();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        Request request = new Request.Builder()
+                .url("http://118.89.200.61:5700/api/envs?t=1736488616793")
+                .put(RequestBody.create(requestBody.getBytes()))
+                .header("Origin", "http://118.89.200.61:5700")
+                .header("Accept", "application/json, text/plain, */*")
+                .header("Authorization", auth)
+                .header("Accept-Language", "zh-CN,zh-Hans;q=0.9")
+                .header("Content-Type", "application/json")
+                .header("Host", "118.89.200.61:5700")
+                .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15")
+                .header("Referer", "http://118.89.200.61:5700/env")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+            response.body().string();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+
 }
